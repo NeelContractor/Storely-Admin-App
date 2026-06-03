@@ -1,6 +1,6 @@
 // src/screens/Settings/SettingsScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../components/ui/Card';
@@ -9,6 +9,7 @@ import { colors } from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useAppStore } from '@/store/useAppStore';
 
 interface SettingItemProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -75,7 +76,8 @@ const SettingGroup: React.FC<{ title: string; children: React.ReactNode }> = ({ 
 
 export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { colors: themeColors, isDark, toggleTheme } = useTheme();
-  const { user, signOut } = useAuthStore();
+  const { signOut } = useAuthStore();
+  const { user } = useAppStore();
   const insets = useSafeAreaInsets();
   const [notifications, setNotifications] = React.useState(true);
   const [emailAlerts, setEmailAlerts] = React.useState(false);
@@ -88,14 +90,22 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     >
       {/* Profile Card */}
       <Card style={styles.profileCard}>
-        <Avatar name={user?.name} size={64} />
+        {/* <Avatar name={user?.name} size={64} /> */}
+        {user?.profileImage ? (
+          <Image
+            source={{ uri: user.profileImage }}
+            style={styles.avatar}
+          />
+        ) : (
+          <Avatar name={user?.name} size={34} />
+        )}
         <View style={styles.profileInfo}>
           <Text style={[styles.profileName, { color: themeColors.text }]}>{user?.name ?? 'Admin'}</Text>
           <Text style={[styles.profileEmail, { color: themeColors.textSecondary }]}>{user?.email}</Text>
-          <View style={styles.roleBadge}>
+          {/* <View style={styles.roleBadge}>
             <Ionicons name="shield-checkmark-outline" size={12} color={colors.primary} />
-            <Text style={styles.roleText}>{user?.role ?? 'Admin'}</Text>
-          </View>
+            <Text style={styles.roleText}>{user?.roles[0] ?? 'Admin'}</Text>
+          </View> */}
         </View>
         <TouchableOpacity style={styles.editBtn}>
           <Ionicons name="pencil-outline" size={18} color={colors.primary} />
@@ -174,6 +184,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: spacing[4], gap: spacing[2] },
+  avatar: { width: 34, height: 34, borderRadius: 17 },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -3,12 +3,13 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SignInScreen } from '../screens/Auth/SignInScreen';
 import { BottomTabNavigator } from './BottomTabNavigator';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAppStore } from '@/store/useAppStore';
 
 const Stack = createStackNavigator();
 
 export const RootNavigator: React.FC = () => {
-  const { isAuthenticated } = useAuthStore();
+  const { authStatus } = useAppStore();
+  const isAuthenticated = authStatus === 'authenticated';
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, animationEnabled: true }}>

@@ -7,18 +7,20 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/storely-logo-main.png",
       "resizeMode": "contain",
       "backgroundColor": "#1C2434"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.storely.admin"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/storely-logo-main.png",
         "backgroundColor": "#1C2434"
       },
       "package": "com.storely.admin"

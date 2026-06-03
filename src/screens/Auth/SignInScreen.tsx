@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, KeyboardAvoidingView,
-  Platform, TouchableOpacity, Alert,
+  Platform, TouchableOpacity, Alert, Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,16 +15,27 @@ import { useAuthStore } from '../../store/useAuthStore';
 
 export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState('admin@storely.com');
-  const [password, setPassword] = useState('password');
-  const [emailError, setEmailError] = useState('');
-  const { signIn, isLoading } = useAuthStore();
+  const [username, setUsername]         = useState('');
+  const [password, setPassword]         = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const { signIn, isLoading, error }    = useAuthStore();
 
   const handleSignIn = async () => {
-    if (!email) { setEmailError('Email is required'); return; }
-    setEmailError('');
-    const success = await signIn(email, password);
-    if (!success) Alert.alert('Error', 'Invalid credentials');
+    if (!username.trim()) {
+      setUsernameError('Username is required');
+      return;
+    }
+    setUsernameError('');
+  
+    const result = await signIn(username.trim(), password);
+  
+    if (result === 'ok') {
+      navigation.reset({ index: 0, routes: [{ name: 'Main' }] }); // ← your tab navigator name
+    } else if (result === 'no-store') {
+      navigation.reset({ index: 0, routes: [{ name: 'CreateStore' }] });
+    } else {
+      Alert.alert('Sign In Failed', error ?? 'Invalid username or password.');
+    }
   };
 
   return (
@@ -35,9 +46,10 @@ export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <StatusBar style="light" />
       <LinearGradient colors={[colors.sidebar, '#0F172A']} style={styles.topSection}>
         <View style={[styles.logoArea, { paddingTop: insets.top + spacing[8] }]}>
-          <View style={styles.logoBox}>
-            <Text style={styles.logoLetter}>S</Text>
-          </View>
+          <Image
+            source={require('./../../../assets/storely-logo-main.png')}
+            style={styles.image}
+          />
           <Text style={styles.brandName}>Storely</Text>
           <Text style={styles.tagline}>Admin Dashboard</Text>
         </View>
@@ -54,14 +66,15 @@ export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
         <View style={styles.form}>
           <InputField
-            label="Email Address"
-            placeholder="admin@storely.com"
-            keyboardType="email-address"
+            label="Username"
+            placeholder="Enter your username"
+            keyboardType="default"
             autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-            leftIcon="mail-outline"
-            error={emailError}
+            autoCorrect={false}
+            value={username}
+            onChangeText={setUsername}
+            leftIcon="person-outline"
+            error={usernameError}
           />
           <InputField
             label="Password"
@@ -84,83 +97,55 @@ export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             size="lg"
           />
         </View>
-
-        <View style={styles.demoHint}>
-          <Text style={styles.demoText}>Demo: Use any email & password to continue</Text>
-        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bgLight },
-  topSection: { paddingBottom: spacing[10] },
+  container:     { flex: 1, backgroundColor: colors.bgLight },
+  image:         { width: 100, height: 100 },
+  topSection:    { paddingBottom: spacing[10] },
   logoArea: {
-    alignItems: 'center',
-    paddingBottom: spacing[8],
+    alignItems:        'center',
+    paddingBottom:     spacing[8],
     paddingHorizontal: spacing[6],
   },
-  logoBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing[3],
-  },
-  logoLetter: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: colors.white,
-  },
   brandName: {
-    fontSize: typography.sizes['3xl'],
-    fontWeight: typography.weights.bold,
-    color: colors.white,
+    fontSize:      typography.sizes['3xl'],
+    fontWeight:    typography.weights.bold,
+    color:         colors.white,
     letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: typography.sizes.base,
-    color: colors.sidebarText,
-    marginTop: 4,
+    fontSize:   typography.sizes.base,
+    color:      colors.sidebarText,
+    marginTop:  4,
   },
   formContainer: {
-    flex: 1,
-    backgroundColor: colors.bgLight,
-    borderTopLeftRadius: 28,
+    flex:                1,
+    backgroundColor:     colors.bgLight,
+    borderTopLeftRadius:  28,
     borderTopRightRadius: 28,
-    marginTop: -24,
+    marginTop:           -24,
   },
-  formContent: { padding: spacing[6], paddingBottom: spacing[10] },
+  formContent:   { padding: spacing[6], paddingBottom: spacing[10] },
   welcomeTitle: {
-    fontSize: typography.sizes['2xl'],
-    fontWeight: typography.weights.bold,
-    color: colors.textPrimary,
+    fontSize:    typography.sizes['2xl'],
+    fontWeight:  typography.weights.bold,
+    color:       colors.textPrimary,
     marginBottom: 4,
   },
   welcomeSub: {
-    fontSize: typography.sizes.base,
-    color: colors.textSecondary,
+    fontSize:     typography.sizes.base,
+    color:        colors.textSecondary,
     marginBottom: spacing[6],
   },
-  form: { gap: 0 },
+  form:   { gap: 0 },
   forgot: { alignSelf: 'flex-end', marginBottom: spacing[5], marginTop: -spacing[2] },
   forgotText: {
-    fontSize: typography.sizes.sm,
-    color: colors.primary,
+    fontSize:   typography.sizes.sm,
+    color:      colors.primary,
     fontWeight: typography.weights.medium,
-  },
-  demoHint: {
-    marginTop: spacing[6],
-    padding: spacing[4],
-    backgroundColor: colors.infoLight,
-    borderRadius: radii.lg,
-    alignItems: 'center',
-  },
-  demoText: {
-    fontSize: typography.sizes.sm,
-    color: colors.info,
   },
 });

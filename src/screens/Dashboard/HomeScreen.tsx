@@ -1,7 +1,7 @@
 // src/screens/Dashboard/HomeScreen.tsx
 import React, { useCallback } from 'react';
 import {
-  ScrollView, View, Text, StyleSheet, RefreshControl, TouchableOpacity,
+  ScrollView, View, ActivityIndicator, Text, StyleSheet, RefreshControl, TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +14,8 @@ import { useTheme } from '../../theme/ThemeContext';
 import { colors } from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
 import { mockStats, mockOrders, mockProducts } from '../../utils/mockData';
-import { useAuthStore } from '../../store/useAuthStore';
+import { useAuth } from '../../hooks/useAuth';
+import { useAppStore } from '@/store/useAppStore';
 
 const dashboardStats = [
   {
@@ -59,8 +60,9 @@ const quickActions = [
 ];
 
 export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const { isVerifying } = useAuth();
   const { colors: themeColors } = useTheme();
-  const { user } = useAuthStore();
+  const { user } = useAppStore();
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -75,6 +77,14 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     if (h < 18) return 'Good Afternoon';
     return 'Good Evening';
   };
+
+  if (isVerifying) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
     <ScrollView

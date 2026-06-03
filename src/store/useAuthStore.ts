@@ -1,51 +1,72 @@
 // src/store/useAuthStore.ts
 import { create } from 'zustand';
-import { User } from '../types';
+import { login } from '../services/authService';
+import { tokenStorage } from '../utils/tokenStorage';
+import { useAppStore } from './useAppStore';
+import * as Device from 'expo-device';
+import { getDeviceToken } from '../utils/getDeviceToken';
+import { Platform } from 'react-native';
 
 interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
   isLoading: boolean;
-  setUser: (user: User) => void;
-  setToken: (token: string) => void;
-  signIn: (email: string, password: string) => Promise<boolean>;
-  signOut: () => void;
+  error:     string | null;
+  signIn:    (username: string, password: string) => Promise<'ok' | 'no-store' | 'error'>;
+  signOut:   () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
   isLoading: false,
+  error:     null,
 
-  setUser: (user) => set({ user, isAuthenticated: true }),
-  setToken: (token) => set({ token }),
-
-  signIn: async (email: string, password: string) => {
-    set({ isLoading: true });
+  signIn: async (username, password) => {
+    set({ isLoading: true, error: null });
     try {
-      // Simulate API call
-      await new Promise((r) => setTimeout(r, 1000));
-      if (email && password) {
-        const mockUser: User = {
-          id: 'u1',
-          name: 'Admin User',
-          email,
-          role: 'admin',
-          createdAt: new Date().toISOString(),
-        };
-        set({ user: mockUser, isAuthenticated: true, token: 'mock-token', isLoading: false });
-        return true;
-      }
-      set({ isLoading: false });
-      return false;
-    } catch {
-      set({ isLoading: false });
-      return false;
-    }
-},
+      const deviceToken = await getDeviceToken();
 
-signOut: () =>
-    set({ user: null, token: null, isAuthenticated: false }),
+      const response = await login({
+        username,
+        password,
+        deviceId:    Device.modelId    ?? 'unknown',
+        deviceType:  Platform.OS === 'ios' ? 'ios' : 'android',
+        deviceToken,
+        deviceName:  Device.deviceName ?? 'unknown',
+        deviceModel: Device.modelName  ?? 'unknown',
+        timestamp:   Date.now(),
+      });
+
+      const token = response?.data?.token;
+      if (!token) {
+        set({ isLoading: false, error: 'Login succeeded but no token received.' });
+        return 'error';
+      }
+
+      await tokenStorage.saveToken(token);
+
+      // Force re-bootstrap even if authStatus was previously 'authenticated'
+      useAppStore.getState().clear();
+      const result = await useAppStore.getState().bootstrap();
+
+      if (result === 'ok') {
+        set({ isLoading: false, error: null });
+        return 'ok';
+      }
+
+      if (result === 'no-store') {
+        set({ isLoading: false, error: null });
+        return 'no-store';
+      }
+
+      set({ isLoading: false, error: 'Failed to load account data.' });
+      return 'error';
+    } catch (err: any) {
+      set({ isLoading: false, error: err?.message || 'Login failed.' });
+      return 'error';
+    }
+  },
+
+  signOut: async () => {
+    await tokenStorage.removeToken();
+    useAppStore.getState().clear();
+    set({ error: null });
+  },
 }));
