@@ -173,25 +173,3 @@ src/
 ├── constants/      # Routes, status colors
 └── utils/          # mockData, helpers
 ```
-
-## Theme System
-- `src/theme/colors.ts` — all color tokens
-- `src/theme/typography.ts` — font sizes, weights, spacing, radii, shadows
-- `src/theme/ThemeContext.tsx` — useTheme() hook with isDark, toggleTheme, colors
-
-## Color Palette (matches web admin)
-- Primary: #3C50E0 (blue)
-- Sidebar: #1C2434 (dark navy)
-- Success: #10B981, Warning: #F59E0B, Danger: #EF4444
-
-## Adding New Screens
-1. Create screen in `src/screens/<Category>/`
-2. Add to appropriate stack in `src/navigation/stacks/`
-3. Add to `src/constants/index.ts` ROUTES
-
-## Running
-```bash
-npx expo start          # Start dev server
-npx expo start --ios    # iOS simulator
-npx expo start --android # Android emulator
-```
