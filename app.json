@@ -1,23 +1,27 @@
 {
   "expo": {
-    "name": "storely-admin-app",
+    "name": "Storely",
     "slug": "storely-admin-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1C2434"
+    },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.storely.admin"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#1C2434"
       },
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.storelyadminapp"
+      "package": "com.storely.admin"
     },
     "web": {
       "favicon": "./assets/favicon.png"
