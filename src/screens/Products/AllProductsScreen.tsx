@@ -1,8 +1,9 @@
 // src/screens/Products/AllProductsScreen.tsx
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, ActivityIndicator, RefreshControl,
+  TextInput, ActivityIndicator, RefreshControl, Modal, ScrollView,
+  Image, Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,9 +13,13 @@ import { typography, spacing, radii } from '../../theme/typography';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAppStore } from '../../store/useAppStore';
 import { useProductStore } from '../../store/useProductStore';
-import type { Product } from '../../types/types';
+import type { Product, Store } from '../../types/types';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE   = 10;
+const SCREEN_W    = Dimensions.get('window').width;
+const H_PADDING   = spacing[4] * 2;
+const GRID_GAP    = spacing[3];
+const GRID_IMG_W  = (SCREEN_W - H_PADDING - GRID_GAP) / 2 - spacing[3] * 2;
 
 function getStatus(p: Product): 'active' | 'low' | 'out' {
   if (!p.inStock || p.stockCount === 0) return 'out';
@@ -22,22 +27,217 @@ function getStatus(p: Product): 'active' | 'low' | 'out' {
   return 'active';
 }
 
-const STATUS_LABEL = { active: 'Active', low: 'Low Stock', out: 'Out of Stock' } as const;
-const STATUS_VARIANT = { active: 'success', low: 'warning', out: 'danger' } as const;
+const STATUS_LABEL   = { active: 'Active', low: 'Low Stock', out: 'Out of Stock' } as const;
+const STATUS_VARIANT = { active: 'success', low: 'warning',  out: 'danger'       } as const;
+
+// ─── Store Switcher ───────────────────────────────────────────────────────────
+
+interface StoreSwitcherProps {
+  stores:      Store[];
+  activeStore: Store | null;
+  onSelect:    (store: Store) => void;
+}
+
+const StoreSwitcher: React.FC<StoreSwitcherProps> = ({ stores, activeStore, onSelect }) => {
+  const { colors: themeColors } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  if (stores.length <= 1) {
+    return (
+      <View style={[styles.storePill, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <Ionicons name="storefront-outline" size={15} color={colors.primary} />
+        <Text style={[styles.storePillText, { color: themeColors.text }]} numberOfLines={1}>
+          {activeStore?.name ?? 'No store'}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <TouchableOpacity
+        style={[styles.storePill, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
+        onPress={() => setOpen(true)}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="storefront-outline" size={15} color={colors.primary} />
+        <Text style={[styles.storePillText, { color: themeColors.text }]} numberOfLines={1}>
+          {activeStore?.name ?? 'Select store'}
+        </Text>
+        <Ionicons name="chevron-down" size={14} color={themeColors.textSecondary} />
+      </TouchableOpacity>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
+          <View style={[styles.dropdown, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+            <Text style={[styles.dropdownTitle, { color: themeColors.textSecondary }]}>
+              Switch Store
+            </Text>
+            <ScrollView bounces={false}>
+              {stores.map((store) => {
+                const isActive = store.id === activeStore?.id;
+                return (
+                  <TouchableOpacity
+                    key={store.id}
+                    style={[
+                      styles.dropdownItem,
+                      isActive && { backgroundColor: colors.primary + '12' },
+                    ]}
+                    onPress={() => { onSelect(store); setOpen(false); }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.dropdownItemLeft}>
+                      <View style={[
+                        styles.storeInitial,
+                        { backgroundColor: isActive ? colors.primary : themeColors.border },
+                      ]}>
+                        {store.logoUrl ? (
+                          <Image
+                            source={{ uri: store.logoUrl }}
+                            style={styles.storeLogoImage}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Text style={[styles.storeInitialText, { color: isActive ? colors.white : themeColors.textSecondary }]}>
+                            {store.name.charAt(0).toUpperCase()}
+                          </Text>
+                        )}
+                      </View>
+                      <View>
+                        <Text style={[styles.dropdownStoreName, { color: themeColors.text }]}>
+                          {store.name}
+                        </Text>
+                        <Text style={[styles.dropdownStoreUsername, { color: themeColors.textSecondary }]}>
+                          @{store.username}
+                        </Text>
+                      </View>
+                    </View>
+                    {isActive && (
+                      <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+};
+
+// ─── Product Image Carousel ───────────────────────────────────────────────────
+
+interface CarouselProps {
+  imageUrl: string;
+  images:   string[];
+  size:     number;
+}
+
+const ProductImageCarousel: React.FC<CarouselProps> = ({ imageUrl, images, size }) => {
+  const allImages = [imageUrl, ...(images ?? [])].filter(Boolean);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  if (allImages.length === 0) {
+    return (
+      <View style={[styles.imagePlaceholder, { width: size, height: size, backgroundColor: colors.primaryLight }]}>
+        <Ionicons name="cube-outline" size={size * 0.4} color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (allImages.length === 1) {
+    return (
+      <Image
+        source={{ uri: allImages[0] }}
+        style={[styles.imagePlaceholder, { width: size, height: size }]}
+        resizeMode="cover"
+      />
+    );
+  }
+
+  return (
+    <View style={{ width: size, height: size }}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) =>
+          setActiveIndex(Math.round(e.nativeEvent.contentOffset.x / size))
+        }
+        style={{ width: size, height: size, borderRadius: radii.lg }}
+      >
+        {allImages.map((uri, i) => (
+          <Image
+            key={i}
+            source={{ uri }}
+            style={{ width: size, height: size, borderRadius: radii.lg }}
+            resizeMode="cover"
+          />
+        ))}
+      </ScrollView>
+      <View style={styles.dotRow}>
+        {allImages.map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              { backgroundColor: i === activeIndex ? colors.white : 'rgba(255,255,255,0.5)' },
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
 
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+const ProductCard: React.FC<{ product: Product; layout: 'list' | 'grid' }> = ({ product, layout }) => {
   const { colors: themeColors } = useTheme();
   const status = getStatus(product);
 
+  if (layout === 'grid') {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={[styles.gridCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
+      >
+        <ProductImageCarousel
+          imageUrl={product.imageUrl}
+          images={product.images}
+          size={GRID_IMG_W}
+        />
+        <View style={styles.gridInfo}>
+          <Text style={[styles.gridName, { color: themeColors.text }]} numberOfLines={2}>
+            {product.name}
+          </Text>
+          <Text style={[styles.gridPrice, { color: colors.primary }]}>
+            ₹{product.price.toLocaleString()}
+          </Text>
+          <View style={styles.gridFooter}>
+            <Badge label={STATUS_LABEL[status]} variant={STATUS_VARIANT[status]} size="sm" />
+            {product.isFeatured && (
+              <Ionicons name="star" size={12} color="#B45309" />
+            )}
+          </View>
+        </View>
+        <TouchableOpacity style={styles.gridMoreBtn}>
+          <Ionicons name="ellipsis-vertical" size={16} color={themeColors.textSecondary} />
+        </TouchableOpacity>
+      </TouchableOpacity>
+    );
+  }
+
+  // ── List layout ──
   return (
     <TouchableOpacity activeOpacity={0.7}>
       <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
-        <View style={[styles.productImagePlaceholder, { backgroundColor: colors.primaryLight }]}>
-          <Ionicons name="cube-outline" size={28} color={colors.primary} />
-        </View>
-
+        <ProductImageCarousel
+          imageUrl={product.imageUrl}
+          images={product.images}
+          size={60}
+        />
         <View style={styles.productInfo}>
           <Text style={[styles.productName, { color: themeColors.text }]} numberOfLines={2}>
             {product.name}
@@ -49,11 +249,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             <Text style={[styles.price, { color: colors.primary }]}>
               ₹{product.price.toLocaleString()}
             </Text>
-            <Badge
-              label={STATUS_LABEL[status]}
-              variant={STATUS_VARIANT[status]}
-              size="sm"
-            />
+            <Badge label={STATUS_LABEL[status]} variant={STATUS_VARIANT[status]} size="sm" />
           </View>
           <View style={styles.productStats}>
             <View style={styles.stat}>
@@ -70,7 +266,6 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             )}
           </View>
         </View>
-
         <TouchableOpacity style={styles.moreBtn}>
           <Ionicons name="ellipsis-vertical" size={18} color={themeColors.textSecondary} />
         </TouchableOpacity>
@@ -85,21 +280,23 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
   const { colors: themeColors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { activeStore } = useAppStore();
-  const { fetchPage, loading: cacheLoading, errors: cacheErrors } = useProductStore();
+  const { stores, activeStore, setActiveStore } = useAppStore();
+  const { fetchPage, errors: cacheErrors }      = useProductStore();
 
-  const storeUsername = activeStore?.username ?? '';
+  const [selectedStore, setSelectedStore] = useState<Store | null>(activeStore);
+  const storeUsername = selectedStore?.username ?? '';
 
-  const [products, setProducts]       = useState<Product[]>([]);
-  const [total, setTotal]             = useState(0);
-  const [hasMore, setHasMore]         = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading]     = useState(false);
+  const [products, setProducts]         = useState<Product[]>([]);
+  const [total, setTotal]               = useState(0);
+  const [hasMore, setHasMore]           = useState(false);
+  const [currentPage, setCurrentPage]   = useState(1);
+  const [isLoading, setIsLoading]       = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [fetchError, setFetchError]   = useState<string | null>(null);
-  const [search, setSearch]           = useState('');
+  const [fetchError, setFetchError]     = useState<string | null>(null);
+  const [search, setSearch]             = useState('');
+  const [layout, setLayout]             = useState<'list' | 'grid'>('list');
 
-  // ── Fetch page ──────────────────────────────────────────────────────────────
+  // ── Fetch ──────────────────────────────────────────────────────────────────
   const loadPage = useCallback(async (page: number, force = false) => {
     if (!storeUsername) return;
     setIsLoading(true);
@@ -121,13 +318,24 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
     setIsLoading(false);
   }, [storeUsername, fetchPage, cacheErrors]);
 
+  // Reset + fetch page 1 on store change
   useEffect(() => {
+    setProducts([]);
+    setTotal(0);
+    setHasMore(false);
+    setSearch('');
     setCurrentPage(1);
+    setFetchError(null);
     loadPage(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeUsername]);
 
+  // Fetch on page change (skip first render — handled above)
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
     loadPage(currentPage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   const onRefresh = useCallback(async () => {
@@ -136,7 +344,12 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
     setIsRefreshing(false);
   }, [currentPage, loadPage]);
 
-  // ── Client-side search filter ────────────────────────────────────────────────
+  const handleStoreSelect = useCallback((store: Store) => {
+    setSelectedStore(store);
+    setActiveStore(store);
+  }, [setActiveStore]);
+
+  // ── Client-side search ─────────────────────────────────────────────────────
   const filtered = useMemo(() =>
     products.filter(p => {
       if (!search) return true;
@@ -148,12 +361,12 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  // ── Empty / no store ────────────────────────────────────────────────────────
-  if (!storeUsername) {
+  // ── No stores ──────────────────────────────────────────────────────────────
+  if (!stores.length) {
     return (
       <View style={[styles.centered, { backgroundColor: themeColors.background }]}>
         <Ionicons name="storefront-outline" size={48} color={colors.textMuted} />
-        <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No store selected</Text>
+        <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No store found</Text>
       </View>
     );
   }
@@ -186,7 +399,26 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
         </TouchableOpacity>
       </View>
 
-      {/* ── Stats row ── */}
+      {/* ── Store Switcher + Layout Toggle ── */}
+      <View style={styles.storeSwitcherRow}>
+        <StoreSwitcher
+          stores={stores}
+          activeStore={selectedStore}
+          onSelect={handleStoreSelect}
+        />
+        <TouchableOpacity
+          style={[styles.layoutToggleBtn, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
+          onPress={() => setLayout(l => l === 'list' ? 'grid' : 'list')}
+        >
+          <Ionicons
+            name={layout === 'list' ? 'grid-outline' : 'list-outline'}
+            size={18}
+            color={themeColors.text}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Stats ── */}
       <View style={[styles.statsRow, { borderBottomColor: themeColors.border }]}>
         {[
           { label: 'Total',     value: total },
@@ -221,11 +453,14 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
         </View>
       )}
 
-      {/* ── List ── */}
+      {/* ── List / Grid ── */}
       {!isLoading && (
         <FlatList
+          key={layout}   // forces remount when numColumns changes
           data={filtered}
           keyExtractor={(item) => item.id}
+          numColumns={layout === 'grid' ? 2 : 1}
+          columnWrapperStyle={layout === 'grid' ? { gap: GRID_GAP } : undefined}
           contentContainerStyle={[
             styles.list,
             { paddingBottom: insets.bottom + spacing[6] },
@@ -238,7 +473,7 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
               tintColor={colors.primary}
             />
           }
-          renderItem={({ item }) => <ProductCard product={item} />}
+          renderItem={({ item }) => <ProductCard product={item} layout={layout} />}
           ItemSeparatorComponent={() => <View style={{ height: spacing[3] }} />}
           ListEmptyComponent={
             <View style={styles.empty}>
@@ -256,19 +491,25 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
                   onPress={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                 >
-                  <Ionicons name="chevron-back" size={18} color={currentPage === 1 ? colors.textMuted : themeColors.text} />
+                  <Ionicons
+                    name="chevron-back"
+                    size={18}
+                    color={currentPage === 1 ? colors.textMuted : themeColors.text}
+                  />
                 </TouchableOpacity>
-
                 <Text style={[styles.pageInfo, { color: themeColors.textSecondary }]}>
                   {currentPage} / {totalPages}
                 </Text>
-
                 <TouchableOpacity
                   style={[styles.pageBtn, !hasMore && styles.pageBtnDisabled]}
                   onPress={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={!hasMore}
                 >
-                  <Ionicons name="chevron-forward" size={18} color={!hasMore ? colors.textMuted : themeColors.text} />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={18}
+                    color={!hasMore ? colors.textMuted : themeColors.text}
+                  />
                 </TouchableOpacity>
               </View>
             ) : null
@@ -279,14 +520,20 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
   );
 };
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  container:  { flex: 1 },
-  centered:   { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[3] },
+  container: { flex: 1 },
+  centered:  { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[3] },
+
+  // ── Top row (search + add) ──
   topRow: {
-    flexDirection: 'row',
-    alignItems:    'center',
-    gap:           spacing[3],
-    padding:       spacing[4],
+    flexDirection:     'row',
+    alignItems:        'center',
+    gap:               spacing[2],
+    paddingHorizontal: spacing[4],
+    paddingTop:        spacing[3],
+    paddingBottom:     spacing[2],
   },
   searchBar: {
     flex:          1,
@@ -297,7 +544,7 @@ const styles = StyleSheet.create({
     borderWidth:   1.5,
     gap:           spacing[2],
   },
-  searchInput:  { flex: 1, fontSize: typography.sizes.base },
+  searchInput: { flex: 1, fontSize: typography.sizes.sm },
   addBtn: {
     backgroundColor: colors.primary,
     width:           44,
@@ -306,23 +553,119 @@ const styles = StyleSheet.create({
     alignItems:      'center',
     justifyContent:  'center',
   },
-  statsRow: {
-    flexDirection:   'row',
+
+  // ── Store switcher row ──
+  storeSwitcherRow: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    justifyContent:    'space-between',
     paddingHorizontal: spacing[4],
-    paddingBottom:   spacing[3],
-    borderBottomWidth: 1,
-    gap:             spacing[2],
+    paddingBottom:     spacing[2],
   },
-  statCard: {
-    flex:        1,
-    alignItems:  'center',
-    paddingVertical: spacing[2],
+  storePill: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    gap:               spacing[1],
+    paddingHorizontal: spacing[3],
+    paddingVertical:   9,
+    borderRadius:      radii.lg,
+    borderWidth:       1.5,
+    maxWidth:          200,
   },
-  statValue: {
-    fontSize:   typography.sizes.lg,
+  storePillText: {
+    fontSize:   typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+    flexShrink: 1,
+  },
+  layoutToggleBtn: {
+    width:          36,
+    height:         36,
+    borderRadius:   radii.lg,
+    borderWidth:    1.5,
+    alignItems:     'center',
+    justifyContent: 'center',
+  },
+
+  // ── Store logo ──
+  storeLogoImage: {
+    width:        36,
+    height:       36,
+    borderRadius: radii.lg,
+  },
+
+  // ── Dropdown modal ──
+  modalOverlay: {
+    flex:              1,
+    backgroundColor:   'rgba(0,0,0,0.35)',
+    justifyContent:    'flex-start',
+    paddingTop:        120,
+    paddingHorizontal: spacing[4],
+  },
+  dropdown: {
+    borderRadius: radii.xl,
+    borderWidth:  1,
+    overflow:     'hidden',
+    maxHeight:    320,
+  },
+  dropdownTitle: {
+    fontSize:          typography.sizes.xs,
+    fontWeight:        typography.weights.semiBold,
+    letterSpacing:     0.8,
+    textTransform:     'uppercase',
+    paddingHorizontal: spacing[4],
+    paddingTop:        spacing[4],
+    paddingBottom:     spacing[2],
+  },
+  dropdownItem: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    justifyContent:    'space-between',
+    paddingHorizontal: spacing[4],
+    paddingVertical:   spacing[3],
+  },
+  dropdownItemLeft: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    gap:           spacing[3],
+  },
+  storeInitial: {
+    width:          36,
+    height:         36,
+    borderRadius:   radii.lg,
+    alignItems:     'center',
+    justifyContent: 'center',
+  },
+  storeInitialText: {
+    fontSize:   typography.sizes.base,
     fontWeight: typography.weights.bold,
   },
+  dropdownStoreName: {
+    fontSize:   typography.sizes.base,
+    fontWeight: typography.weights.medium,
+  },
+  dropdownStoreUsername: {
+    fontSize:  typography.sizes.xs,
+    marginTop: 1,
+  },
+
+  // ── Stats row ──
+  statsRow: {
+    flexDirection:     'row',
+    paddingHorizontal: spacing[4],
+    paddingTop:        spacing[2],
+    paddingBottom:     spacing[3],
+    borderBottomWidth: 1,
+    gap:               spacing[2],
+  },
+  statCard: {
+    flex:            1,
+    alignItems:      'center',
+    paddingVertical: spacing[2],
+  },
+  statValue: { fontSize: typography.sizes.lg, fontWeight: typography.weights.bold },
   statLabel: { fontSize: typography.sizes.xs, marginTop: 2 },
+
+  // ── Error ──
   errorBanner: {
     flexDirection:   'row',
     alignItems:      'center',
@@ -332,8 +675,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEE2E2',
     borderRadius:    radii.lg,
   },
-  errorText:    { fontSize: typography.sizes.sm, color: colors.danger, flex: 1 },
-  list:         { paddingHorizontal: spacing[4] },
+  errorText: { fontSize: typography.sizes.sm, color: colors.danger, flex: 1 },
+
+  // ── List ──
+  list: { paddingHorizontal: spacing[4], paddingTop: spacing[3] },
+
+  // ── List card ──
   card: {
     flexDirection: 'row',
     padding:       spacing[4],
@@ -341,13 +688,6 @@ const styles = StyleSheet.create({
     borderWidth:   1,
     gap:           spacing[3],
     alignItems:    'flex-start',
-  },
-  productImagePlaceholder: {
-    width:          60,
-    height:         60,
-    borderRadius:   radii.lg,
-    alignItems:     'center',
-    justifyContent: 'center',
   },
   productInfo:  { flex: 1 },
   productName: {
@@ -363,31 +703,89 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom:   spacing[2],
   },
-  price: {
-    fontSize:   typography.sizes.md,
-    fontWeight: typography.weights.bold,
-  },
+  price:        { fontSize: typography.sizes.md, fontWeight: typography.weights.bold },
   productStats: { flexDirection: 'row', gap: spacing[4] },
   stat:         { flexDirection: 'row', alignItems: 'center', gap: 4 },
   statText:     { fontSize: typography.sizes.xs },
   moreBtn:      { padding: spacing[1] },
-  empty:        { alignItems: 'center', paddingTop: spacing[16], gap: spacing[3] },
-  emptyText:    { fontSize: typography.sizes.base },
-  pagination: {
-    flexDirection:  'row',
-    alignItems:     'center',
-    justifyContent: 'center',
-    gap:            spacing[4],
-    paddingVertical: spacing[4],
+
+  // ── Grid card ──
+  gridCard: {
+    flex:         1,
+    borderRadius: radii.xl,
+    borderWidth:  1,
+    overflow:     'hidden',
+    padding:      spacing[3],
   },
-  pageBtn: {
-    width:          36,
-    height:         36,
+  gridInfo: {
+    marginTop: spacing[2],
+    gap:       spacing[1],
+  },
+  gridName: {
+    fontSize:   typography.sizes.sm,
+    fontWeight: typography.weights.semiBold,
+    lineHeight: 18,
+  },
+  gridPrice: {
+    fontSize:   typography.sizes.sm,
+    fontWeight: typography.weights.bold,
+  },
+  gridFooter: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    gap:           spacing[2],
+    marginTop:     spacing[1],
+  },
+  gridMoreBtn: {
+    position: 'absolute',
+    top:      spacing[2],
+    right:    spacing[2],
+  },
+
+  // ── Image placeholder (shared) ──
+  imagePlaceholder: {
     borderRadius:   radii.lg,
     alignItems:     'center',
     justifyContent: 'center',
+    overflow:       'hidden',
+  },
+
+  // ── Carousel dots ──
+  dotRow: {
+    position:       'absolute',
+    bottom:         spacing[1],
+    left:           0,
+    right:          0,
+    flexDirection:  'row',
+    justifyContent: 'center',
+    gap:            4,
+  },
+  dot: {
+    width:        5,
+    height:       5,
+    borderRadius: 3,
+  },
+
+  // ── Empty state ──
+  empty: { alignItems: 'center', paddingTop: spacing[16], gap: spacing[3] },
+  emptyText: { fontSize: typography.sizes.base },
+
+  // ── Pagination ──
+  pagination: {
+    flexDirection:   'row',
+    alignItems:      'center',
+    justifyContent:  'center',
+    gap:             spacing[4],
+    paddingVertical: spacing[4],
+  },
+  pageBtn: {
+    width:           36,
+    height:          36,
+    borderRadius:    radii.lg,
+    alignItems:      'center',
+    justifyContent:  'center',
     backgroundColor: 'rgba(0,0,0,0.05)',
   },
   pageBtnDisabled: { opacity: 0.4 },
-  pageInfo:         { fontSize: typography.sizes.sm },
+  pageInfo:        { fontSize: typography.sizes.sm },
 });

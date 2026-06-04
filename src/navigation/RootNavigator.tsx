@@ -16,7 +16,11 @@ export const RootNavigator: React.FC = () => {
       {!isAuthenticated ? (
         <Stack.Screen name="SignIn" component={SignInScreen} />
       ) : (
-        <Stack.Screen name="Main" component={BottomTabNavigator} />
+        <Stack.Screen 
+          name="Main" 
+          component={BottomTabNavigator}
+          options={{ animationTypeForReplace: 'push' }} 
+        />
       )}
     </Stack.Navigator>
   );

@@ -2,28 +2,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
+import { Card }   from '../ui/Card';
+import { Badge }  from '../ui/Badge';
 import { Avatar } from '../ui/Avatar';
-import { Order } from '../../types';
-import { colors } from '../../theme/colors';
+import { MockOrder } from '../../utils/mockData';   // ← mock-only type, not the real Order
+import { colors }    from '../../theme/colors';
 import { typography, spacing } from '../../theme/typography';
-import { useTheme } from '../../theme/ThemeContext';
-import { ORDER_STATUS_COLORS } from '../../constants';
+import { useTheme }  from '../../theme/ThemeContext';
 
 interface RecentOrdersCardProps {
-  orders: Order[];
-  onViewAll?: () => void;
+  orders:      MockOrder[];
+  onViewAll?:  () => void;
 }
 
-function getStatusVariant(status: Order['status']): 'success' | 'warning' | 'danger' | 'info' | 'default' {
-  const map: Record<Order['status'], 'success' | 'warning' | 'danger' | 'info' | 'default'> = {
-    delivered: 'success',
-    pending: 'warning',
-    cancelled: 'danger',
+function getStatusVariant(
+  status: MockOrder['status']
+): 'success' | 'warning' | 'danger' | 'info' | 'default' {
+  const map: Record<MockOrder['status'], 'success' | 'warning' | 'danger' | 'info' | 'default'> = {
+    delivered:  'success',
+    pending:    'warning',
+    cancelled:  'danger',
     processing: 'info',
-    shipped: 'info',
-    returned: 'default',
+    shipped:    'info',
+    returned:   'default',
   };
   return map[status];
 }
@@ -46,12 +47,18 @@ export const RecentOrdersCard: React.FC<RecentOrdersCardProps> = ({ orders, onVi
           key={order.id}
           style={[
             styles.row,
-            i < orders.length - 1 && { borderBottomWidth: 1, borderBottomColor: themeColors.border },
+            i < Math.min(orders.length, 5) - 1 && {
+              borderBottomWidth: 1,
+              borderBottomColor: themeColors.border,
+            },
           ]}
         >
           <Avatar name={order.customer.name} size={38} />
           <View style={styles.rowInfo}>
-            <Text style={[styles.customerName, { color: themeColors.text }]} numberOfLines={1}>
+            <Text
+              style={[styles.customerName, { color: themeColors.text }]}
+              numberOfLines={1}
+            >
               {order.customer.name}
             </Text>
             <Text style={[styles.orderNum, { color: themeColors.textSecondary }]}>
@@ -77,37 +84,41 @@ export const RecentOrdersCard: React.FC<RecentOrdersCardProps> = ({ orders, onVi
 const styles = StyleSheet.create({
   card: { marginBottom: spacing[4] },
   header: {
-    flexDirection: 'row',
+    flexDirection:  'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[4],
+    alignItems:     'center',
+    marginBottom:   spacing[4],
   },
   title: {
-    fontSize: typography.sizes.lg,
+    fontSize:   typography.sizes.lg,
     fontWeight: typography.weights.semiBold,
   },
-  viewAll: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  viewAll: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    gap:           4,
+  },
   viewAllText: {
-    fontSize: typography.sizes.sm,
-    color: colors.primary,
+    fontSize:   typography.sizes.sm,
+    color:      colors.primary,
     fontWeight: typography.weights.medium,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection:   'row',
+    alignItems:      'center',
     paddingVertical: spacing[3],
-    gap: spacing[3],
+    gap:             spacing[3],
   },
-  rowInfo: { flex: 1 },
+  rowInfo:      { flex: 1 },
   customerName: {
-    fontSize: typography.sizes.base,
-    fontWeight: typography.weights.medium,
+    fontSize:     typography.sizes.base,
+    fontWeight:   typography.weights.medium,
     marginBottom: 2,
   },
   orderNum: { fontSize: typography.sizes.sm },
   rowRight: { alignItems: 'flex-end', gap: 4 },
   amount: {
-    fontSize: typography.sizes.base,
+    fontSize:   typography.sizes.base,
     fontWeight: typography.weights.semiBold,
   },
 });
