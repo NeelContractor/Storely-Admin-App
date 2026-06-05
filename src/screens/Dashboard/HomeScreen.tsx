@@ -111,7 +111,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     },
     {
       title:    'Products',
-      value:    (page1?.total ?? mockStats.totalProducts).toLocaleString(),
+      value:    (page1?.total ?? 0).toLocaleString(),
       change:   mockStats.productsChange,
       icon:     'cube-outline'   as const,
       iconBg:   '#FEE2E2',

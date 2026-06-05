@@ -1,25 +1,28 @@
-// src/screens/Products/AddProductScreen.tsx
+// src/screens/Products/EditProductScreen.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, Switch, Alert, ActivityIndicator,
   KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
-import { useSafeAreaInsets }     from 'react-native-safe-area-context';
-import { Ionicons }              from '@expo/vector-icons';
-import * as ImagePicker          from 'expo-image-picker';
-import { useTheme }              from '../../theme/ThemeContext';
-import { useAppStore }           from '../../store/useAppStore';
-import { useCategoryStore }      from '../../store/useCategoryStore';
-import { useProductStore }       from '../../store/useProductStore';
-import { createProduct }         from '../../services/productService';
-import { cloudinarySignature }   from '../../services/imageService';
-import { colors }                from '../../theme/colors';
+import { useSafeAreaInsets }      from 'react-native-safe-area-context';
+import { Ionicons }               from '@expo/vector-icons';
+import * as ImagePicker           from 'expo-image-picker';
+import type { StackScreenProps }  from '@react-navigation/stack';
+import { useTheme }               from '../../theme/ThemeContext';
+import { useCategoryStore }       from '../../store/useCategoryStore';
+import { useProductStore }        from '../../store/useProductStore';
+import { updateProduct }          from '../../services/productService';
+import { colors }                 from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
-import type { CreateProductRequestBody } from '../../types/types';
 import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload';
+import { generateSlug }           from '../../utils/slug';
+import type { Product, UpdateProductRequestBody } from '../../types/types';
+import type { ProductsStackParamList } from '../../navigation/stacks/ProductsStack';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+type EditProductScreenProps = StackScreenProps<ProductsStackParamList, 'EditProduct'>;
 
 interface FormState {
   name:           string;
@@ -28,12 +31,12 @@ interface FormState {
   compareAtPrice: string;
   currency:       string;
   imageUrl:       string;
-  images:         string[];          // up to 2 additional
+  images:         string[];
   slug:           string;
   stockCount:     string;
   inStock:        boolean;
   isFeatured:     boolean;
-  tags:           string;            // comma-separated
+  tags:           string;
   categoryIds:    number[];
 }
 
@@ -49,60 +52,34 @@ interface FieldError {
 const MAX_EXTRA_IMAGES = 2;
 const CURRENCIES       = ['INR'] as const;
 
-const INITIAL_FORM: FormState = {
-  name: '', description: '', price: '', compareAtPrice: '',
-  currency: 'INR', imageUrl: '', images: [], slug: '',
-  stockCount: '', inStock: true, isFeatured: false,
-  tags: '', categoryIds: [],
-};
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// ─── Slug helper ──────────────────────────────────────────────────────────────
-
-function toSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+function productToForm(p: Product): FormState {
+  return {
+    name:           p.name           ?? '',
+    description:    p.description    ?? '',
+    price:          String(p.price   ?? ''),
+    compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '',
+    currency:       p.currency       ?? 'INR',
+    imageUrl:       p.imageUrl       ?? '',
+    images:         Array.isArray(p.images) ? p.images : [],
+    slug:           p.slug           ?? '',
+    stockCount:     p.stockCount != null ? String(p.stockCount) : '',
+    inStock:        p.inStock        ?? true,
+    isFeatured:     p.isFeatured     ?? false,
+    tags:           Array.isArray(p.tags) ? p.tags.join(', ') : '',
+    categoryIds:    Array.isArray(p.categoryIds) ? p.categoryIds : [],
+  };
 }
 
-// ─── Cloudinary upload (React Native) ────────────────────────────────────────
-// Uses the same backend signature endpoint as the web version, but constructs
-// FormData using the RN image picker asset (uri / base64 blob).
-
-// async function uploadImageToCloudinary(uri: string): Promise<string> {
-//   // 1. Get signed credentials from our backend
-//   const sigRes  = await cloudinarySignature();
-//   const { apiKey, cloudName, folder, signature, timestamp } = sigRes.data;
-
-//   // 2. Build multipart FormData (RN-compatible)
-//   const formData = new FormData();
-//   const filename = uri.split('/').pop() ?? 'photo.jpg';
-//   const match    = /\.(\w+)$/.exec(filename);
-//   const type     = match ? `image/${match[1]}` : 'image/jpeg';
-
-//   // React Native FormData accepts { uri, name, type } objects
-//   formData.append('file', { uri, name: filename, type } as any);
-//   formData.append('api_key',   apiKey);
-//   formData.append('timestamp', String(timestamp));
-//   formData.append('signature', signature);
-//   if (folder) formData.append('folder', folder);
-
-//   // 3. POST directly to Cloudinary
-//   const response = await fetch(
-//     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-//     { method: 'POST', body: formData },
-//   );
-
-//   if (!response.ok) {
-//     const err = await response.json().catch(() => ({}));
-//     throw new Error((err as any)?.error?.message ?? `Upload failed (${response.status})`);
-//   }
-
-//   const data = await response.json();
-//   return data.secure_url as string;
-// }
+function formsAreEqual(a: FormState, b: FormState): boolean {
+  return (Object.keys(a) as (keyof FormState)[]).every(key => {
+    const va = a[key];
+    const vb = b[key];
+    if (Array.isArray(va) && Array.isArray(vb)) return JSON.stringify(va) === JSON.stringify(vb);
+    return va === vb;
+  });
+}
 
 // ─── Small reusable UI pieces ─────────────────────────────────────────────────
 
@@ -148,7 +125,7 @@ const ff = StyleSheet.create({
   err:   { fontSize: typography.sizes.xs, color: colors.danger, marginTop: 4 },
 });
 
-// ─── Image Picker + Upload ────────────────────────────────────────────────────
+// ─── Image Upload Button ──────────────────────────────────────────────────────
 
 interface ImageUploadProps {
   uri?:      string;
@@ -169,8 +146,8 @@ const ImageUploadButton: React.FC<ImageUploadProps> = ({ uri, label, onSuccess, 
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.85,
+      mediaTypes: ['images'] as any,
+      quality:    0.85,
       allowsEditing: true,
     });
     if (result.canceled || !result.assets?.[0]) return;
@@ -191,9 +168,17 @@ const ImageUploadButton: React.FC<ImageUploadProps> = ({ uri, label, onSuccess, 
   if (uri) {
     return (
       <View style={[iu.thumb, { width: size, height: size }]}>
-        <Image source={{ uri }} style={{ width: size, height: size, borderRadius: radii.lg }} resizeMode="cover" />
+        <Image
+          source={{ uri }}
+          style={{ width: size, height: size, borderRadius: radii.lg }}
+          resizeMode="cover"
+        />
         {onRemove && (
-          <TouchableOpacity style={iu.removeBtn} onPress={onRemove} hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}>
+          <TouchableOpacity
+            style={iu.removeBtn}
+            onPress={onRemove}
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+          >
             <Ionicons name="close-circle" size={18} color={colors.danger} />
           </TouchableOpacity>
         )}
@@ -231,22 +216,28 @@ const iu = StyleSheet.create({
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
-export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+export const EditProductScreen: React.FC<EditProductScreenProps> = ({ navigation, route }) => {
+  const { product, storeUsername } = route.params;
+
   const { colors: themeColors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { activeStore }           = useAppStore();
-  const { fetchCategories }       = useCategoryStore();
-  const { invalidate }            = useProductStore();
+  const { fetchCategories } = useCategoryStore();
+  const { invalidate }      = useProductStore();
 
-  const [form, setForm]                 = useState<FormState>(INITIAL_FORM);
+  const [form, setForm]                 = useState<FormState>(() => productToForm(product));
   const [errors, setErrors]             = useState<FieldError>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories]     = useState<{ id: number; name: string }[]>([]);
   const [catLoading, setCatLoading]     = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
-  const storeUsername = activeStore?.username ?? '';
+  // Always use the original slug for the PUT endpoint even if the user edits it
+  const originalSlug = useRef(product.slug);
+
+  // ── Saved baseline: updated after each successful save so isDirty stays correct
+  //    if the user edits the same product twice without leaving the screen.
+  const savedBaseline = useRef<FormState>(productToForm(product));
 
   // ── Load categories ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -265,9 +256,18 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
   }, [errors]);
 
   const handleNameChange = useCallback((val: string) => {
-    const slug = toSlug(val);
-    setForm(f => ({ ...f, name: val, slug }));
-    setErrors(e => ({ ...e, name: undefined, slug: undefined }));
+    setForm(f => {
+      // Only auto-update slug if it still matches the auto-derived slug for the
+      // current name (i.e. the user hasn't manually customised it).
+      const currentAutoSlug = generateSlug(f.name);
+      const slugIsAuto = f.slug === currentAutoSlug || f.slug === savedBaseline.current.slug;
+      return {
+        ...f,
+        name: val,
+        slug: slugIsAuto ? generateSlug(val) : f.slug,
+      };
+    });
+    setErrors(e => ({ ...e, name: undefined }));
   }, []);
 
   const toggleCategory = (id: number) => {
@@ -289,7 +289,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
       ? Math.round((1 - +form.price / +form.compareAtPrice) * 100)
       : 0;
 
-  // ── Completion checklist (mirrors web version) ────────────────────────────────
+  // ── Completion checklist ──────────────────────────────────────────────────────
   const checklist = [
     { label: 'Product name',      done: !!form.name.trim() },
     { label: 'Category selected', done: form.categoryIds.length > 0 },
@@ -300,34 +300,37 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
     { label: 'Main image',        done: !!form.imageUrl },
   ];
   const progress = Math.round(
-    (checklist.filter(c => c.done).length / checklist.length) * 100
+    (checklist.filter(c => c.done).length / checklist.length) * 100,
   );
+
+  // ── Dirty check against the last *saved* state (not the original route param)
+  const isDirty = !formsAreEqual(form, savedBaseline.current);
 
   // ── Validation ────────────────────────────────────────────────────────────────
   const validate = (): boolean => {
     const e: FieldError = {};
-    if (!form.name.trim())                           e.name       = 'Product name is required';
+    if (!form.name.trim())                           e.name        = 'Product name is required';
     if (!form.price || isNaN(+form.price) || +form.price <= 0)
-                                                     e.price      = 'Enter a valid price greater than 0';
-    if (!form.slug.trim())                           e.slug       = 'Slug is required';
+                                                     e.price       = 'Enter a valid price greater than 0';
+    if (!form.slug.trim())                           e.slug        = 'Slug is required';
     if (form.categoryIds.length === 0)               e.categoryIds = 'Select at least one category';
-    if (form.inStock && !form.stockCount)            e.stockCount = 'Stock count is required when In Stock';
-    if (form.stockCount && isNaN(+form.stockCount))  e.stockCount = 'Stock must be a number';
+    if (form.inStock && !form.stockCount)            e.stockCount  = 'Stock count is required when In Stock';
+    if (form.stockCount && isNaN(+form.stockCount))  e.stockCount  = 'Stock must be a number';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   // ── Submit ────────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
-    if (!validate()) return;
-    if (!storeUsername) {
-      Alert.alert('No store selected', 'Please select an active store first.');
+    if (!isDirty) {
+      Alert.alert('No changes', "You haven't made any changes to save.");
       return;
     }
+    if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      const body: CreateProductRequestBody = {
+      const body: UpdateProductRequestBody = {
         name:           form.name.trim(),
         description:    form.description.trim(),
         price:          parseFloat(form.price),
@@ -343,25 +346,33 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         categoryIds:    form.categoryIds,
       };
 
-      await createProduct(storeUsername, body);
-      // Invalidate cache so AllProductsScreen refreshes on back
+      await updateProduct(storeUsername, originalSlug.current, body);
+
+      // ── Update the saved baseline so isDirty resets correctly ──────────────
+      savedBaseline.current = { ...form };
+
+      // ── Invalidate cache so AllProductsScreen re-fetches fresh data ─────────
       invalidate(storeUsername);
 
-      Alert.alert('Product created!', `"${body.name}" was added successfully.`, [
+      Alert.alert('Product updated!', `"${body.name}" was saved successfully.`, [
         { text: 'Done', onPress: () => navigation.goBack() },
-        { text: 'Add another', onPress: () => { setForm(INITIAL_FORM); setErrors({}); } },
       ]);
     } catch (err: any) {
-      Alert.alert('Failed to create product', err?.message ?? 'Something went wrong. Please try again.');
+      Alert.alert('Failed to update product', err?.message ?? 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // ── Shared input style ────────────────────────────────────────────────────────
-  const inputBase = [styles.input, { backgroundColor: themeColors.card, borderColor: themeColors.border, color: themeColors.text }];
+  const inputBase = [
+    styles.input,
+    { backgroundColor: themeColors.card, borderColor: themeColors.border, color: themeColors.text },
+  ];
   const inp = (field?: keyof FieldError) =>
     field && errors[field] ? [...inputBase, styles.inputError] : inputBase;
+
+  // ─────────────────────────────────────────────────────────────────────────────
 
   return (
     <KeyboardAvoidingView
@@ -393,8 +404,11 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
           <View style={styles.checklistRow}>
             {checklist.map(({ label, done }) => (
               <View key={label} style={styles.checkItem}>
-                <Ionicons name={done ? 'checkmark-circle' : 'ellipse-outline'} size={13}
-                  color={done ? colors.success : themeColors.textSecondary} />
+                <Ionicons
+                  name={done ? 'checkmark-circle' : 'ellipse-outline'}
+                  size={13}
+                  color={done ? colors.success : themeColors.textSecondary}
+                />
                 <Text style={[styles.checkText, { color: done ? colors.success : themeColors.textSecondary }]}>
                   {label}
                 </Text>
@@ -433,7 +447,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
               />
             </View>
             <Text style={[styles.slugHint, { color: themeColors.textSecondary }]}>
-              Auto-generated from name · editable
+              Changing the slug will update the product URL
             </Text>
           </Field>
 
@@ -448,20 +462,24 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
             />
           </Field>
 
-          <Field label="Tags" >
+          <Field label="Tags">
             <TextInput
               style={inp()}
               placeholder="wireless, audio, electronics (comma-separated)"
               placeholderTextColor={colors.textMuted}
               value={form.tags}
               onChangeText={v => setField('tags', v)}
-              autoCapitalize="none" autoCorrect={false}
+              autoCapitalize="none"
+              autoCorrect={false}
             />
           </Field>
           {form.tags.trim().length > 0 && (
             <View style={styles.tagRow}>
               {form.tags.split(',').map(t => t.trim()).filter(Boolean).map((tag, i) => (
-                <View key={i} style={[styles.tagChip, { backgroundColor: '#0891b2' + '18', borderColor: '#0891b2' + '40' }]}>
+                <View
+                  key={i}
+                  style={[styles.tagChip, { backgroundColor: '#0891b2' + '18', borderColor: '#0891b2' + '40' }]}
+                >
                   <Text style={[styles.tagText, { color: '#0891b2' }]}>{tag}</Text>
                 </View>
               ))}
@@ -489,7 +507,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                 </View>
               ) : (
                 <Text style={[styles.imageHelpText, { color: themeColors.textSecondary }]}>
-                  Tap to pick a photo from your library. It will be uploaded to Cloudinary automatically.
+                  Tap to pick a new photo. It will be uploaded to Cloudinary automatically.
                 </Text>
               )}
             </View>
@@ -522,14 +540,17 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
           <SectionHeader icon="pricetag-outline" title="Pricing" accent={colors.success} />
 
-          {/* Currency */}
           <Field label="Currency">
             <TouchableOpacity
               style={[inp(), styles.pickerBtn]}
               onPress={() => setShowCurrencyPicker(v => !v)}
             >
               <Text style={{ color: themeColors.text, fontSize: typography.sizes.base }}>{form.currency}</Text>
-              <Ionicons name={showCurrencyPicker ? 'chevron-up' : 'chevron-down'} size={16} color={themeColors.textSecondary} />
+              <Ionicons
+                name={showCurrencyPicker ? 'chevron-up' : 'chevron-down'}
+                size={16}
+                color={themeColors.textSecondary}
+              />
             </TouchableOpacity>
             {showCurrencyPicker && (
               <View style={[styles.pickerDropdown, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
@@ -549,7 +570,6 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
             )}
           </Field>
 
-          {/* Price + Compare-at */}
           <View style={styles.row}>
             <View style={styles.half}>
               <Field label="Selling Price" required error={errors.price}>
@@ -592,7 +612,6 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
           <SectionHeader icon="cube-outline" title="Inventory" accent="#B45309" />
 
-          {/* Availability + Stock side-by-side */}
           <View style={styles.row}>
             <View style={styles.half}>
               <Field label="Availability">
@@ -627,7 +646,6 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
             </View>
           </View>
 
-          {/* Featured toggle */}
           <View style={styles.toggleRow}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.toggleLabel, { color: themeColors.text }]}>Featured Product</Text>
@@ -666,8 +684,8 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                     style={[
                       styles.catChip,
                       {
-                        backgroundColor: selected ? colors.primary        : themeColors.background,
-                        borderColor:     selected ? colors.primary        : themeColors.border,
+                        backgroundColor: selected ? colors.primary   : themeColors.background,
+                        borderColor:     selected ? colors.primary   : themeColors.border,
                       },
                     ]}
                     onPress={() => toggleCategory(cat.id)}
@@ -686,7 +704,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
         {/* ── SUBMIT ── */}
         <TouchableOpacity
-          style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
+          style={[styles.submitBtn, (!isDirty || isSubmitting) && styles.submitBtnDisabled]}
           onPress={handleSubmit}
           disabled={isSubmitting}
           activeOpacity={0.8}
@@ -696,7 +714,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
           ) : (
             <>
               <Ionicons name="checkmark-circle-outline" size={20} color={colors.white} />
-              <Text style={styles.submitText}>Create Product</Text>
+              <Text style={styles.submitText}>{isDirty ? 'Save Changes' : 'No Changes'}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -712,10 +730,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll:    { padding: spacing[4], gap: spacing[3] },
 
-  // ── Progress card ──
-  progressCard: {
-    borderRadius: radii.xl, borderWidth: 1, padding: spacing[4], marginBottom: spacing[1],
-  },
+  progressCard:   { borderRadius: radii.xl, borderWidth: 1, padding: spacing[4], marginBottom: spacing[1] },
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing[2] },
   progressLabel:  { fontSize: typography.sizes.sm, fontWeight: typography.weights.medium },
   progressPct:    { fontSize: typography.sizes.sm, fontWeight: typography.weights.bold },
@@ -725,58 +740,47 @@ const styles = StyleSheet.create({
   checkItem:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   checkText:      { fontSize: typography.sizes.xs },
 
-  // ── Card ──
-  card: {
-    borderRadius: radii.xl, borderWidth: 1, padding: spacing[5], marginBottom: spacing[1],
-  },
+  card: { borderRadius: radii.xl, borderWidth: 1, padding: spacing[5], marginBottom: spacing[1] },
 
-  // ── Input ──
   input: {
     borderWidth: 1.5, borderRadius: radii.lg,
     paddingHorizontal: spacing[4],
-    paddingVertical:   Platform.OS === 'ios' ? spacing[3] : spacing[2],
+    paddingVertical: Platform.OS === 'ios' ? spacing[3] : spacing[2],
     fontSize: typography.sizes.base,
   },
   inputError:    { borderColor: colors.danger },
   inputDisabled: { opacity: 0.5 },
   textarea:      { minHeight: 96, paddingTop: spacing[3] },
 
-  // ── Slug ──
-  slugRow:       { flexDirection: 'row', alignItems: 'stretch' },
-  slugPrefix:    {
+  slugRow:        { flexDirection: 'row', alignItems: 'stretch' },
+  slugPrefix:     {
     borderWidth: 1.5, borderRightWidth: 0,
     borderTopLeftRadius: radii.lg, borderBottomLeftRadius: radii.lg,
-    paddingHorizontal: spacing[3],
-    justifyContent: 'center',
+    paddingHorizontal: spacing[3], justifyContent: 'center',
   },
   slugPrefixText: { fontSize: typography.sizes.sm },
   slugInput:      { flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
   slugHint:       { fontSize: typography.sizes.xs, marginTop: 4 },
 
-  // ── Tags ──
   tagRow:  { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2], marginTop: -spacing[1], marginBottom: spacing[3] },
   tagChip: { paddingHorizontal: spacing[3], paddingVertical: 5, borderRadius: radii.full, borderWidth: 1 },
   tagText: { fontSize: typography.sizes.xs, fontWeight: typography.weights.medium },
 
-  // ── Media / images ──
   imageRow:      { flexDirection: 'row', gap: spacing[3], alignItems: 'flex-start' },
   imageHelpText: { flex: 1, fontSize: typography.sizes.xs, lineHeight: 16 },
   imageUrlHint:  { fontSize: typography.sizes.xs },
   extraImageRow: { flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' },
 
-  // ── Pricing ──
   row:  { flexDirection: 'row', gap: spacing[3] },
   half: { flex: 1 },
-  pickerBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-  },
-  pickerDropdown: {
-    borderWidth: 1, borderRadius: radii.lg, marginTop: 4, overflow: 'hidden',
-  },
-  pickerOption: {
+
+  pickerBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  pickerDropdown: { borderWidth: 1, borderRadius: radii.lg, marginTop: 4, overflow: 'hidden' },
+  pickerOption:   {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: spacing[4], paddingVertical: spacing[3],
   },
+
   discountBadge: {
     flexDirection: 'row', alignItems: 'center', gap: spacing[1],
     backgroundColor: colors.success + '14', borderRadius: radii.full,
@@ -785,16 +789,14 @@ const styles = StyleSheet.create({
   },
   discountText: { fontSize: typography.sizes.xs, color: colors.success, fontWeight: typography.weights.semiBold },
 
-  // ── Inventory ──
-  availDot:   { width: 8, height: 8, borderRadius: 4, marginRight: spacing[1] },
-  toggleRow:  {
+  availDot:  { width: 8, height: 8, borderRadius: 4, marginRight: spacing[1] },
+  toggleRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingTop: spacing[3], borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.06)',
   },
   toggleLabel: { fontSize: typography.sizes.base, fontWeight: typography.weights.medium },
   toggleSub:   { fontSize: typography.sizes.xs, marginTop: 2 },
 
-  // ── Categories ──
   catError: { fontSize: typography.sizes.xs, marginBottom: spacing[2] },
   noCats:   { fontSize: typography.sizes.sm, paddingVertical: spacing[2] },
   catGrid:  { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
@@ -805,7 +807,6 @@ const styles = StyleSheet.create({
   },
   catText: { fontSize: typography.sizes.sm, fontWeight: typography.weights.medium },
 
-  // ── Submit ──
   submitBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[2],
     backgroundColor: colors.primary, borderRadius: radii.xl, paddingVertical: spacing[4],

@@ -97,7 +97,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
             style={styles.avatar}
           />
         ) : (
-          <Avatar name={user?.name} size={34} />
+          <Avatar name={user?.name} size={46} />
         )}
         <View style={styles.profileInfo}>
           <Text style={[styles.profileName, { color: themeColors.text }]}>{user?.name ?? 'Admin'}</Text>
@@ -184,7 +184,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: spacing[4], gap: spacing[2] },
-  avatar: { width: 34, height: 34, borderRadius: 17 },
+  avatar: { width: 46, height: 46, borderRadius: 17 },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -5,8 +5,16 @@ import { AllProductsScreen } from '../../screens/Products/AllProductsScreen';
 import { AddProductScreen } from '@/screens/Products/AddProductsScreen';
 import { AppHeader } from '../../components/header/AppHeader';
 import { useTheme } from '../../theme/ThemeContext';
+import { EditProductScreen } from '@/screens/Products/EditProductsScreen';
+import { Product } from '@/types';
 
-const Stack = createStackNavigator();
+export type ProductsStackParamList = {
+  AllProducts: undefined;
+  AddProduct:  undefined;
+  EditProduct: { product: Product; storeUsername: string };
+};
+
+const Stack = createStackNavigator<ProductsStackParamList>();
 
 export const ProductsStack: React.FC = () => {
   const { colors: themeColors } = useTheme();
@@ -33,6 +41,7 @@ export const ProductsStack: React.FC = () => {
     >
       <Stack.Screen name="AllProducts" component={AllProductsScreen} />
       <Stack.Screen name="AddProduct"  component={AddProductScreen} />
+      <Stack.Screen name="EditProduct" component={EditProductScreen} />
     </Stack.Navigator>
   );
 };
