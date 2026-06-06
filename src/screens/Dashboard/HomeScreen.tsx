@@ -54,6 +54,18 @@ const quickActions: {
     color:   '#8B5CF6',
     onPress: (nav) => nav.navigate('MoreTab', { screen: 'Analytics' }),
   },
+  {
+    label:   'Add Category',
+    icon:    'add-circle-outline',
+    color:   '#3093ec',
+    onPress: (nav) => nav.navigate('MoreTab', { screen: 'Categories' }),
+  },
+  {
+    label:   'Low Stock',
+    icon:    'close-circle',
+    color:   '#ed1515',
+    onPress: (nav) => nav.navigate('MoreTab', { screen: 'LowStock' }),
+  },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────

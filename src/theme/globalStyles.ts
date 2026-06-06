@@ -396,15 +396,25 @@ export const globalStyles = StyleSheet.create({
   // QUICK ACTIONS GRID
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // quickActionsGrid: {
+  //   flexDirection:   'row',
+  //   justifyContent:  'space-between',
+  //   marginTop:       spacing[3],
+  // },
   quickActionsGrid: {
-    flexDirection:   'row',
-    justifyContent:  'space-between',
-    marginTop:       spacing[3],
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
 
+  // quickAction: {
+  //   alignItems: 'center',
+  //   gap:        spacing[2],
+  // },
   quickAction: {
+    width: '25%',
     alignItems: 'center',
-    gap:        spacing[2],
+    justifyContent: 'center',
+    paddingVertical: 2,
   },
 
   quickActionIcon: {

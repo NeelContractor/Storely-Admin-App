@@ -35,15 +35,23 @@ export type ApiResponse<T> = {
   };
   
   // ─── Store ─────────────────────────────────────────────────────────────────────
+
+  export enum StoreTheme {
+    MINIMAL_LIGHT = "MINIMAL_LIGHT",
+    MINIMAL_DARK  = "MINIMAL_DARK",
+    BOLD_LIGHT    = "BOLD_LIGHT",
+    BOLD_DARK     = "BOLD_DARK",
+    CLASSIC       = "CLASSIC",
+  }
   
-  export type Store = {
+export type Store = {
     id: string;
     username: string;
     name: string;
     bio: string;
     logoUrl: string;
     bannerUrl: string;
-    theme: string;
+    theme: StoreTheme;
     socialLinks: {
       instagram: string;
       whatsapp: string;
@@ -51,7 +59,7 @@ export type ApiResponse<T> = {
       twitter: string;
     };
     createdAt: string;
-  };
+};
   
   export type CreateStoreBody = {
     username: string;

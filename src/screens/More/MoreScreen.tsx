@@ -9,22 +9,23 @@ import { typography, spacing, radii } from '../../theme/typography';
 import { useTheme } from '../../theme/ThemeContext';
 
 interface MoreItem {
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-  route: string;
+  label:       string;
+  icon:        keyof typeof Ionicons.glyphMap;
+  color:       string;
+  route:       string;
   description: string;
 }
 
+// ── All colors are hardcoded hex — no dependency on colors.warning / colors.info
 const MORE_ITEMS: MoreItem[] = [
-  { label: 'Analytics', icon: 'bar-chart-outline', color: colors.primary, route: 'Analytics', description: 'Revenue & sales reports' },
-  { label: 'Settings', icon: 'settings-outline', color: '#8B5CF6', route: 'Settings', description: 'App & account settings' },
-  { label: 'Marketing', icon: 'megaphone-outline', color: colors.warning, route: 'Marketing', description: 'Campaigns & coupons' },
-  { label: 'Store Profile', icon: 'storefront-outline', color: colors.success, route: 'Store', description: 'Manage your store' },
-  { label: 'Categories', icon: 'grid-outline', color: colors.info, route: 'Categories', description: 'Product categories' },
-  { label: 'Low Stock', icon: 'warning-outline', color: colors.danger, route: 'LowStock', description: 'Items running low' },
-  { label: 'Reviews', icon: 'star-outline', color: '#F59E0B', route: 'Reviews', description: 'Customer feedback' },
-  { label: 'Messages', icon: 'chatbubbles-outline', color: '#EC4899', route: 'Messages', description: 'Customer messages' },
+  { label: 'Analytics',     icon: 'bar-chart-outline',    color: colors.primary, route: 'Analytics', description: 'Revenue & sales reports'  },
+  { label: 'Settings',      icon: 'settings-outline',     color: '#8B5CF6',      route: 'Settings',  description: 'App & account settings'   },
+  { label: 'Marketing',     icon: 'megaphone-outline',    color: '#F59E0B',      route: 'Marketing', description: 'Campaigns & coupons'      },
+  { label: 'Store Profile', icon: 'storefront-outline',   color: '#10B981',      route: 'Store',     description: 'Manage your store'        },
+  { label: 'Categories',    icon: 'grid-outline',         color: '#0891B2',      route: 'Categories',description: 'Product categories'       },
+  { label: 'Low Stock',     icon: 'warning-outline',      color: colors.danger,  route: 'LowStock',  description: 'Items running low'        },
+  { label: 'Reviews',       icon: 'star-outline',         color: '#F59E0B',      route: 'Reviews',   description: 'Customer feedback'        },
+  { label: 'Messages',      icon: 'chatbubbles-outline',  color: '#EC4899',      route: 'Messages',  description: 'Customer messages'        },
 ];
 
 export const MoreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -63,30 +64,30 @@ export const MoreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { padding: spacing[4] },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
-  gridItem: { width: '47%' },
+  content:   { padding: spacing[4] },
+  grid:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
+  gridItem:  { width: '47%' },
   itemCard: {
-    alignItems: 'center',
-    paddingVertical: spacing[5],
+    alignItems:        'center',
+    paddingVertical:   spacing[5],
     paddingHorizontal: spacing[4],
-    gap: spacing[2],
+    gap:               spacing[2],
   },
   itemIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: radii.xl,
-    alignItems: 'center',
+    width:          56,
+    height:         56,
+    borderRadius:   radii.xl,
+    alignItems:     'center',
     justifyContent: 'center',
-    marginBottom: spacing[1],
+    marginBottom:   spacing[1],
   },
   itemLabel: {
-    fontSize: typography.sizes.base,
+    fontSize:   typography.sizes.base,
     fontWeight: typography.weights.semiBold,
-    textAlign: 'center',
+    textAlign:  'center',
   },
   itemDesc: {
-    fontSize: typography.sizes.xs,
+    fontSize:  typography.sizes.xs,
     textAlign: 'center',
   },
 });

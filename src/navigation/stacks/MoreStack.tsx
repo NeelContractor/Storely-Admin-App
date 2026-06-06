@@ -6,6 +6,10 @@ import { SettingsScreen } from '../../screens/Settings/SettingsScreen';
 import { AppHeader } from '../../components/header/AppHeader';
 import { useTheme } from '../../theme/ThemeContext';
 import { MoreScreen } from './../../screens/More/MoreScreen';
+import { StoreProfileScreen } from '@/screens/Store/StoreProfileScreen';
+import { CategoriesScreen } from '@/screens/Categories/CategoriesScreen';
+import { LowStockScreen } from '@/screens/Products/LowStockScreen';
+import { StoresScreen } from '@/screens/Store/StoresScreen';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +39,10 @@ export const MoreStack: React.FC = () => {
       <Stack.Screen name="More" component={MoreScreen} />
       <Stack.Screen name="Analytics" component={AnalyticsScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Store" component={StoreProfileScreen} />
+      <Stack.Screen name="Stores" component={StoresScreen} />
+      <Stack.Screen name="Categories" component={CategoriesScreen} />
+      <Stack.Screen name="LowStock" component={LowStockScreen} />
     </Stack.Navigator>
   );
 };
