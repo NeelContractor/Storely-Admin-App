@@ -355,7 +355,7 @@ const LowStockRow: React.FC<{
 const row = StyleSheet.create({
   card: {
     flexDirection:  'row',
-    alignItems:     'flex-start',   // ← was 'center'; items anchor to top, not mid-screen
+    alignItems:     'flex-start',   
     gap:            spacing[3],
     padding:        spacing[3],
     marginHorizontal: spacing[4],
@@ -369,12 +369,12 @@ const row = StyleSheet.create({
     borderRadius: radii.lg,
     alignItems: 'center', justifyContent: 'center',
     flexShrink: 0, overflow: 'hidden',
-    marginTop: 2,                   // slight optical alignment with first text line
+    marginTop: 2,                   
   },
   thumbImg:  { width: 48, height: 48 },
   info: {
-    flex:      1,                   // fills remaining horizontal space
-    alignSelf: 'stretch',           // ← stretches to card height so bar/meta align properly
+    flex:      1,                  
+    alignSelf: 'stretch',          
     gap:       3,
   },
   name:     { fontSize: typography.sizes.sm, fontWeight: typography.weights.semiBold, lineHeight: 18 },
@@ -397,7 +397,7 @@ const row = StyleSheet.create({
     borderRadius:   radii.lg,
     borderWidth:    1,
     flexShrink:     0,
-    marginTop:      2,              // align with thumb top
+    marginTop:      2,            
   },
   restockText: { fontSize: 10, fontWeight: '700' },
 });

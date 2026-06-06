@@ -60,7 +60,18 @@ export type Store = {
     };
     createdAt: string;
 };
-  
+
+export type Category = {
+  id:            number;
+  name:          string;
+  slug:          string;
+  description?:  string;
+  imageUrl?:     string;
+  parentId?:     number;
+  displayOrder?: number;
+  active?:       boolean;
+};
+
   export type CreateStoreBody = {
     username: string;
     name: string;

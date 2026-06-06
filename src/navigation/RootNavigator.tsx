@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SignInScreen } from '../screens/Auth/SignInScreen';
 import { BottomTabNavigator } from './BottomTabNavigator';
 import { useAppStore } from '@/store/useAppStore';
-import { RegisterScreen } from '@/screens/Auth/Registercreen';
+import { RegisterScreen } from '@/screens/Auth/RegisterScreen';
 
 const Stack = createStackNavigator();
 

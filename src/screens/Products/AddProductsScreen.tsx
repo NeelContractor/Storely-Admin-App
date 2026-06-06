@@ -18,6 +18,7 @@ import { colors }                from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
 import type { CreateProductRequestBody } from '../../types/types';
 import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload';
+import { ImageUploadButton } from '@/components/ImageUploadButton';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -146,87 +147,6 @@ const ff = StyleSheet.create({
   label: { fontSize: typography.sizes.sm, fontWeight: typography.weights.medium },
   req:   { color: colors.danger, fontSize: typography.sizes.sm },
   err:   { fontSize: typography.sizes.xs, color: colors.danger, marginTop: 4 },
-});
-
-// ─── Image Picker + Upload ────────────────────────────────────────────────────
-
-interface ImageUploadProps {
-  uri?:      string;
-  label:     string;
-  onSuccess: (url: string) => void;
-  onRemove?: () => void;
-  small?:    boolean;
-}
-
-const ImageUploadButton: React.FC<ImageUploadProps> = ({ uri, label, onSuccess, onRemove, small }) => {
-  const { colors: c } = useTheme();
-  const [uploading, setUploading] = useState(false);
-
-  const pick = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission needed', 'Allow photo library access to upload images.');
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.85,
-      allowsEditing: true,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
-
-    setUploading(true);
-    try {
-      const url = await uploadImageToCloudinary(result.assets[0].uri);
-      onSuccess(url);
-    } catch (err: any) {
-      Alert.alert('Upload failed', err?.message ?? 'Could not upload image.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const size = small ? 64 : 100;
-
-  if (uri) {
-    return (
-      <View style={[iu.thumb, { width: size, height: size }]}>
-        <Image source={{ uri }} style={{ width: size, height: size, borderRadius: radii.lg }} resizeMode="cover" />
-        {onRemove && (
-          <TouchableOpacity style={iu.removeBtn} onPress={onRemove} hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}>
-            <Ionicons name="close-circle" size={18} color={colors.danger} />
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  }
-
-  return (
-    <TouchableOpacity
-      style={[iu.placeholder, { width: size, height: size, borderColor: c.border, backgroundColor: c.card }]}
-      onPress={pick}
-      disabled={uploading}
-      activeOpacity={0.75}
-    >
-      {uploading ? (
-        <ActivityIndicator color={colors.primary} />
-      ) : (
-        <>
-          <Ionicons name="cloud-upload-outline" size={small ? 20 : 26} color={colors.primary} />
-          <Text style={[iu.label, { color: c.textSecondary, fontSize: small ? 9 : 10 }]}>{label}</Text>
-        </>
-      )}
-    </TouchableOpacity>
-  );
-};
-const iu = StyleSheet.create({
-  thumb:       { position: 'relative' },
-  removeBtn:   { position: 'absolute', top: -6, right: -6 },
-  placeholder: {
-    borderWidth: 1.5, borderStyle: 'dashed', borderRadius: radii.lg,
-    alignItems: 'center', justifyContent: 'center', gap: 4,
-  },
-  label: { textAlign: 'center', fontWeight: typography.weights.medium, paddingHorizontal: 4 },
 });
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────

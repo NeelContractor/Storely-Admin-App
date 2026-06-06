@@ -10,6 +10,7 @@ import type {
     UpdateProductRequestBody,
     GetProductBySlugParams,
     CreateCategoriesBody,
+    Category
 } from "../types/types";
 
 const PAGE_SIZE = 10;
@@ -83,7 +84,7 @@ export const deleteProduct = (
 // GET /categories/{storeUsername}
 export const getCategories = (
     storeUsername: string,
-): Promise<ApiResponse<void>> =>
+): Promise<ApiResponse<Category[]>> =>
     api(ENDPOINTS.GET_CATEGORIES(storeUsername), {
         method: "GET",
         requiresAuth: true,

@@ -1,47 +1,60 @@
 // src/components/ecommerce/LowStockAlerts.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card }     from '../ui/Card';
 import { colors }   from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
-import { useTheme } from '../../theme/ThemeContext';
-import type { Store } from '../../types/types';
-import type { ProductPage } from '../../store/useAppStore';
+import { useTheme }    from '../../theme/ThemeContext';
+import { useAppStore } from '../../store/useAppStore';
+import { useProductStore } from '../../store/useProductStore';
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
-interface StoreEntry {
-  store: Store;
-  page1: ProductPage | null;
-}
+const LOW_STOCK_LIMIT = 10;
 
 interface LowStockAlertsProps {
-  storeData:           StoreEntry[];
   activeStoreUsername: string;
   onViewAll?:          () => void;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
-  storeData,
   activeStoreUsername,
   onViewAll,
 }) => {
   const { colors: themeColors } = useTheme();
 
-  const defaultUsername =
-    storeData.find(e => e.store.username === activeStoreUsername)?.store.username ??
-    storeData[0]?.store.username ??
-    '';
+  // ✅ Read stores list from appStore
+  const stores = useAppStore(s => s.stores);
 
-  const [selectedUsername, setSelectedUsername] = useState(defaultUsername);
+  // ✅ Read product pages from useProductStore — same source as LowStockScreen
+  const { fetchPage, getPage } = useProductStore();
 
-  const selectedEntry = storeData.find(e => e.store.username === selectedUsername);
-  const products      = selectedEntry?.page1?.products ?? [];
-  const lowStock      = products.filter(p => p.stockCount <= 10);
-  const multiStore    = storeData.length > 1;
+  const [selectedUsername, setSelectedUsername] = useState('');
+
+  // Sync selected store
+  useEffect(() => {
+    const stillValid = stores.some(s => s.username === selectedUsername);
+    if (stillValid) return;
+    const match =
+      stores.find(s => s.username === activeStoreUsername)?.username ??
+      stores[0]?.username ??
+      '';
+    setSelectedUsername(match);
+  }, [stores, activeStoreUsername]);
+
+  // ✅ Trigger fetches for all stores (no-op if already cached)
+  useEffect(() => {
+    stores.forEach(s => {
+      fetchPage({ username: s.username, page: 1, pageSize: 50 });
+    });
+  }, [stores]);
+
+  const multiStore = stores.length > 1;
+
+  // Selected store products — from useProductStore, same as LowStockScreen
+  const selectedPage  = getPage({ username: selectedUsername, page: 1, pageSize: 50 });
+  const products      = selectedPage?.products ?? [];
+  const isLoading     = !selectedPage;
+  const lowStock      = products.filter(p => !p.inStock || p.stockCount <= LOW_STOCK_LIMIT);
 
   return (
     <Card>
@@ -58,7 +71,7 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* ── Store switcher tabs (multi-store only) ── */}
+      {/* ── Store switcher (multi-store only) ── */}
       {multiStore && (
         <ScrollView
           horizontal
@@ -66,9 +79,12 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
           contentContainerStyle={styles.tabsContent}
           style={styles.tabs}
         >
-          {storeData.map(({ store, page1 }) => {
+          {stores.map(store => {
             const active   = store.username === selectedUsername;
-            const lowCount = (page1?.products ?? []).filter(p => p.stockCount <= 10).length;
+            const sp       = getPage({ username: store.username, page: 1, pageSize: 50 });
+            const lowCount = (sp?.products ?? []).filter(
+              p => !p.inStock || p.stockCount <= LOW_STOCK_LIMIT
+            ).length;
 
             return (
               <TouchableOpacity
@@ -91,10 +107,7 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
                     styles.tabBadge,
                     { backgroundColor: active ? '#ffffff33' : colors.dangerLight },
                   ]}>
-                    <Text style={[
-                      styles.tabBadgeText,
-                      { color: active ? '#fff' : colors.danger },
-                    ]}>
+                    <Text style={[styles.tabBadgeText, { color: active ? '#fff' : colors.danger }]}>
                       {lowCount}
                     </Text>
                   </View>
@@ -105,10 +118,16 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
         </ScrollView>
       )}
 
-      {/* ── List ── */}
-      {lowStock.length === 0 ? (
+      {/* ── Body ── */}
+      {isLoading ? (
         <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>
-          All products are well stocked.
+          Loading products…
+        </Text>
+      ) : lowStock.length === 0 ? (
+        <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>
+          {products.length === 0
+            ? 'No products found for this store.'
+            : 'All products are well stocked.'}
         </Text>
       ) : (
         lowStock.slice(0, 4).map((product, i) => (
@@ -159,90 +178,32 @@ const styles = StyleSheet.create({
     alignItems:     'center',
     marginBottom:   spacing[3],
   },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems:    'center',
-    gap:           spacing[2],
-  },
+  titleRow:   { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   warningIcon: {
-    width:           28,
-    height:          28,
-    borderRadius:    8,
+    width: 28, height: 28, borderRadius: 8,
     backgroundColor: colors.warningLight,
-    alignItems:      'center',
-    justifyContent:  'center',
+    alignItems: 'center', justifyContent: 'center',
   },
-  title: {
-    fontSize:   typography.sizes.lg,
-    fontWeight: typography.weights.semiBold,
-  },
-  viewAll: {
-    fontSize:   typography.sizes.sm,
-    color:      colors.primary,
-    fontWeight: typography.weights.medium,
-  },
-  tabs: {
-    marginBottom: spacing[3],
-  },
-  tabsContent: {
-    gap:           spacing[2],
-    paddingBottom: spacing[1],
-  },
+  title:   { fontSize: typography.sizes.lg, fontWeight: typography.weights.semiBold },
+  viewAll: { fontSize: typography.sizes.sm, color: colors.primary, fontWeight: typography.weights.medium },
+  tabs:        { marginBottom: spacing[3] },
+  tabsContent: { gap: spacing[2], paddingBottom: spacing[1] },
   tab: {
-    flexDirection:     'row',
-    alignItems:        'center',
-    gap:               spacing[1],
-    paddingHorizontal: spacing[3],
-    paddingVertical:   6,
-    borderRadius:      radii.full,
-    borderWidth:       1,
+    flexDirection: 'row', alignItems: 'center', gap: spacing[1],
+    paddingHorizontal: spacing[3], paddingVertical: 6,
+    borderRadius: radii.full, borderWidth: 1,
   },
-  tabText: {
-    fontSize:   typography.sizes.sm,
-    fontWeight: typography.weights.medium,
-  },
-  tabBadge: {
-    minWidth:          18,
-    height:            18,
-    borderRadius:      9,
-    alignItems:        'center',
-    justifyContent:    'center',
-    paddingHorizontal: 4,
-  },
-  tabBadgeText: {
-    fontSize:   10,
-    fontWeight: typography.weights.bold,
-  },
-  emptyText: {
-    fontSize:        typography.sizes.sm,
-    textAlign:       'center',
-    paddingVertical: spacing[4],
-  },
+  tabText:      { fontSize: typography.sizes.sm, fontWeight: typography.weights.medium },
+  tabBadge:     { minWidth: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
+  tabBadgeText: { fontSize: 10, fontWeight: typography.weights.bold },
+  emptyText:    { fontSize: typography.sizes.sm, textAlign: 'center', paddingVertical: spacing[4] },
   row: {
-    flexDirection:   'row',
-    alignItems:      'center',
-    justifyContent:  'space-between',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingVertical: spacing[3],
   },
-  productInfo: {
-    flex:        1,
-    marginRight: spacing[3],
-  },
-  productName: {
-    fontSize:     typography.sizes.base,
-    fontWeight:   typography.weights.medium,
-    marginBottom: 2,
-  },
-  sku: {
-    fontSize: typography.sizes.sm,
-  },
-  stockBadge: {
-    paddingHorizontal: spacing[3],
-    paddingVertical:   5,
-    borderRadius:      radii.full,
-  },
-  stockText: {
-    fontSize:   typography.sizes.sm,
-    fontWeight: typography.weights.semiBold,
-  },
+  productInfo:  { flex: 1, marginRight: spacing[3] },
+  productName:  { fontSize: typography.sizes.base, fontWeight: typography.weights.medium, marginBottom: 2 },
+  sku:          { fontSize: typography.sizes.sm },
+  stockBadge:   { paddingHorizontal: spacing[3], paddingVertical: 5, borderRadius: radii.full },
+  stockText:    { fontSize: typography.sizes.sm, fontWeight: typography.weights.semiBold },
 });

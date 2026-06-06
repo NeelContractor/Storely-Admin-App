@@ -87,17 +87,21 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   // ── Per-store page-1 data ─────────────────────────────────────────────────
   // Derive once; used for both the total count and the low-stock widget.
-  const allStorePage1 = stores.map(s => ({
-    store: s,
-    page1: getProductPage(s.username, 1, 20),
-  }));
+  // const allStorePage1 = stores.map(s => ({
+  //   store: s,
+  //   page1: getProductPage(s.username, 1, 20),
+  // }));
 
   // Total products = sum of meta.total across every store's page-1 response.
   // Falls back to 0 while a store's data is still loading.
-  const totalProducts = allStorePage1.reduce(
-    (sum, { page1: p }) => sum + (p?.total ?? 0),
-    0,
-  );
+  // const totalProducts = allStorePage1.reduce(
+  //   (sum, { page1: p }) => sum + (p?.total ?? 0),
+  //   0,
+  // );
+
+  const totalProducts = stores.reduce((sum, s) => {
+    return sum + (getProductPage(s.username, 1, 20)?.total ?? 0);
+  }, 0);
 
   // ── Refresh ───────────────────────────────────────────────────────────────
   const onRefresh = useCallback(async () => {
@@ -209,8 +213,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       {/* Low Stock — now receives all stores' data with switcher built-in */}
       <View style={g.mb4}>
-        <LowStockAlerts
-          storeData={allStorePage1}
+      <LowStockAlerts
           activeStoreUsername={activeStore?.username ?? ''}
           onViewAll={() => navigation.navigate('MoreTab', { screen: 'LowStock' })}
         />
