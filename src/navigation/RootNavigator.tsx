@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SignInScreen } from '../screens/Auth/SignInScreen';
 import { BottomTabNavigator } from './BottomTabNavigator';
 import { useAppStore } from '@/store/useAppStore';
+import { RegisterScreen } from '@/screens/Auth/Registercreen';
 
 const Stack = createStackNavigator();
 
@@ -14,7 +15,10 @@ export const RootNavigator: React.FC = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, animationEnabled: true }}>
       {!isAuthenticated ? (
-        <Stack.Screen name="SignIn" component={SignInScreen} />
+        <>
+          <Stack.Screen name="SignIn"    component={SignInScreen}    />
+          <Stack.Screen name="Register" component={RegisterScreen}  />
+        </>
       ) : (
         <Stack.Screen 
           name="Main" 

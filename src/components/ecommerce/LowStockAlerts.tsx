@@ -1,26 +1,51 @@
 // src/components/ecommerce/LowStockAlerts.tsx
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Card } from '../ui/Card';
-import { Product } from '../../types/types';          // ← real type, not mock index
-import { colors } from '../../theme/colors';
+import { Card }     from '../ui/Card';
+import { colors }   from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
 import { useTheme } from '../../theme/ThemeContext';
+import type { Store } from '../../types/types';
+import type { ProductPage } from '../../store/useAppStore';
 
-interface LowStockAlertsProps {
-  products:   Product[];
-  onViewAll?: () => void;
+// ─── Props ────────────────────────────────────────────────────────────────────
+
+interface StoreEntry {
+  store: Store;
+  page1: ProductPage | null;
 }
 
-export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({ products, onViewAll }) => {
+interface LowStockAlertsProps {
+  storeData:           StoreEntry[];
+  activeStoreUsername: string;
+  onViewAll?:          () => void;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
+  storeData,
+  activeStoreUsername,
+  onViewAll,
+}) => {
   const { colors: themeColors } = useTheme();
 
-  // Real Product uses stockCount (number) instead of stock
-  const lowStock = products.filter(p => p.stockCount <= 10);
+  const defaultUsername =
+    storeData.find(e => e.store.username === activeStoreUsername)?.store.username ??
+    storeData[0]?.store.username ??
+    '';
+
+  const [selectedUsername, setSelectedUsername] = useState(defaultUsername);
+
+  const selectedEntry = storeData.find(e => e.store.username === selectedUsername);
+  const products      = selectedEntry?.page1?.products ?? [];
+  const lowStock      = products.filter(p => p.stockCount <= 10);
+  const multiStore    = storeData.length > 1;
 
   return (
-    <Card style={styles.card}>
+    <Card>
+      {/* ── Header ── */}
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <View style={styles.warningIcon}>
@@ -33,6 +58,54 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({ products, onView
         </TouchableOpacity>
       </View>
 
+      {/* ── Store switcher tabs (multi-store only) ── */}
+      {multiStore && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsContent}
+          style={styles.tabs}
+        >
+          {storeData.map(({ store, page1 }) => {
+            const active   = store.username === selectedUsername;
+            const lowCount = (page1?.products ?? []).filter(p => p.stockCount <= 10).length;
+
+            return (
+              <TouchableOpacity
+                key={store.username}
+                onPress={() => setSelectedUsername(store.username)}
+                style={[
+                  styles.tab,
+                  {
+                    backgroundColor: active ? colors.primary : themeColors.card,
+                    borderColor:     active ? colors.primary : themeColors.border,
+                  },
+                ]}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.tabText, { color: active ? '#fff' : themeColors.text }]}>
+                  {store.name}
+                </Text>
+                {lowCount > 0 && (
+                  <View style={[
+                    styles.tabBadge,
+                    { backgroundColor: active ? '#ffffff33' : colors.dangerLight },
+                  ]}>
+                    <Text style={[
+                      styles.tabBadgeText,
+                      { color: active ? '#fff' : colors.danger },
+                    ]}>
+                      {lowCount}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
+
+      {/* ── List ── */}
       {lowStock.length === 0 ? (
         <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>
           All products are well stocked.
@@ -56,7 +129,6 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({ products, onView
               >
                 {product.name}
               </Text>
-              {/* Real Product has no SKU — show slug as the identifier */}
               <Text style={[styles.sku, { color: themeColors.textSecondary }]}>
                 {product.slug}
               </Text>
@@ -64,10 +136,7 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({ products, onView
 
             <View style={[
               styles.stockBadge,
-              {
-                backgroundColor:
-                  product.stockCount === 0 ? colors.dangerLight : colors.warningLight,
-              },
+              { backgroundColor: product.stockCount === 0 ? colors.dangerLight : colors.warningLight },
             ]}>
               <Text style={[
                 styles.stockText,
@@ -84,13 +153,11 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({ products, onView
 };
 
 const styles = StyleSheet.create({
-  card: { marginBottom: spacing[4] },
-
   header: {
     flexDirection:  'row',
     justifyContent: 'space-between',
     alignItems:     'center',
-    marginBottom:   spacing[4],
+    marginBottom:   spacing[3],
   },
   titleRow: {
     flexDirection: 'row',
@@ -114,17 +181,47 @@ const styles = StyleSheet.create({
     color:      colors.primary,
     fontWeight: typography.weights.medium,
   },
-
+  tabs: {
+    marginBottom: spacing[3],
+  },
+  tabsContent: {
+    gap:           spacing[2],
+    paddingBottom: spacing[1],
+  },
+  tab: {
+    flexDirection:     'row',
+    alignItems:        'center',
+    gap:               spacing[1],
+    paddingHorizontal: spacing[3],
+    paddingVertical:   6,
+    borderRadius:      radii.full,
+    borderWidth:       1,
+  },
+  tabText: {
+    fontSize:   typography.sizes.sm,
+    fontWeight: typography.weights.medium,
+  },
+  tabBadge: {
+    minWidth:          18,
+    height:            18,
+    borderRadius:      9,
+    alignItems:        'center',
+    justifyContent:    'center',
+    paddingHorizontal: 4,
+  },
+  tabBadgeText: {
+    fontSize:   10,
+    fontWeight: typography.weights.bold,
+  },
   emptyText: {
-    fontSize:  typography.sizes.sm,
-    textAlign: 'center',
+    fontSize:        typography.sizes.sm,
+    textAlign:       'center',
     paddingVertical: spacing[4],
   },
-
   row: {
-    flexDirection:  'row',
-    alignItems:     'center',
-    justifyContent: 'space-between',
+    flexDirection:   'row',
+    alignItems:      'center',
+    justifyContent:  'space-between',
     paddingVertical: spacing[3],
   },
   productInfo: {
@@ -139,7 +236,6 @@ const styles = StyleSheet.create({
   sku: {
     fontSize: typography.sizes.sm,
   },
-
   stockBadge: {
     paddingHorizontal: spacing[3],
     paddingVertical:   5,

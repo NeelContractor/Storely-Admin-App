@@ -505,6 +505,23 @@ export const globalStyles = StyleSheet.create({
   // AUTH SCREENS (SignIn / CreateStore)
   // ═══════════════════════════════════════════════════════════════════════════
 
+  authTopSectionSm: {
+    height: 160,          // shorter than authTopSection
+    justifyContent: 'flex-end',
+  },
+  authBackBtn: {
+    position: 'absolute',
+    left: 16,
+    padding: 4,
+  },
+  authFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    paddingBottom: 8,
+  },
+
   authTopSection: {
     paddingBottom: spacing[10],
   },

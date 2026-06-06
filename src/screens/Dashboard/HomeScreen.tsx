@@ -1,5 +1,5 @@
 // src/screens/Dashboard/HomeScreen.tsx
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ScrollView, View, ActivityIndicator, Text, StyleSheet, RefreshControl, TouchableOpacity,
 } from 'react-native';
@@ -13,12 +13,12 @@ import { RecentOrdersCard } from '../../components/ecommerce/RecentOrdersCard';
 import { LowStockAlerts }   from '../../components/ecommerce/LowStockAlerts';
 import { Card }             from '../../components/ui/Card';
 import { useTheme }         from '../../theme/ThemeContext';
-import { g }                from '../../theme/globalStyles';       // ← global styles
+import { g }                from '../../theme/globalStyles';
 import { colors }           from '../../theme/colors';
 import { spacing }          from '../../theme/typography';
-import { useAppStore }      from '../../store/useAppStore';        // ← single store
+import { useAppStore }      from '../../store/useAppStore';
 import { useAuth }          from '../../hooks/useAuth';
-import { mockStats, mockOrders }        from '../../utils/mockData';
+import { mockStats, mockOrders } from '../../utils/mockData';
 
 // ─── Quick actions ────────────────────────────────────────────────────────────
 
@@ -71,23 +71,40 @@ const quickActions: {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { isVerifying }          = useAuth();
-  const { colors: themeColors }  = useTheme();
-  const insets                   = useSafeAreaInsets();
-  const [refreshing, setRefreshing] = React.useState(false);
+  const { isVerifying }         = useAuth();
+  const { colors: themeColors } = useTheme();
+  const insets                  = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Pull everything from the single store
-  const { user, activeStore, loadStoreData, getProductPage, 
-    // getOrders 
-  } = useAppStore();
-  const storeUsername = activeStore?.username ?? '';
-  const page1         = getProductPage(storeUsername, 1, 20);
-  // const orders        = getOrders(storeUsername);
+  const { user, stores, activeStore, loadStoreData, getProductPage } = useAppStore();
 
-  const onRefresh = useCallback(() => {
+  // ── Bootstrap all stores so totals are accurate ───────────────────────────
+  // page1 of every store is loaded in the background on mount.
+  // This is cheap: loadStoreData is a no-op if cache is fresh.
+  useEffect(() => {
+    stores.forEach(s => loadStoreData(s.username));
+  }, [stores]);
+
+  // ── Per-store page-1 data ─────────────────────────────────────────────────
+  // Derive once; used for both the total count and the low-stock widget.
+  const allStorePage1 = stores.map(s => ({
+    store: s,
+    page1: getProductPage(s.username, 1, 20),
+  }));
+
+  // Total products = sum of meta.total across every store's page-1 response.
+  // Falls back to 0 while a store's data is still loading.
+  const totalProducts = allStorePage1.reduce(
+    (sum, { page1: p }) => sum + (p?.total ?? 0),
+    0,
+  );
+
+  // ── Refresh ───────────────────────────────────────────────────────────────
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    loadStoreData(storeUsername, true).finally(() => setRefreshing(false));
-  }, [storeUsername]);
+    await Promise.all(stores.map(s => loadStoreData(s.username, true)));
+    setRefreshing(false);
+  }, [stores]);
 
   const getGreeting = () => {
     const h = new Date().getHours();
@@ -98,35 +115,36 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const dashboardStats = [
     {
-      title:    'Total Revenue',
-      value:    `$${mockStats.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      change:   mockStats.revenueChange,
-      icon:     'cash-outline'   as const,
-      iconBg:   '#EEF2FF',
+      title:     'Total Revenue',
+      value:     `$${mockStats.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      change:    mockStats.revenueChange,
+      icon:      'cash-outline'   as const,
+      iconBg:    '#EEF2FF',
       iconColor: colors.primary,
     },
     {
-      title:    'Total Orders',
-      value:    mockStats.totalOrders.toLocaleString(),
-      change:   mockStats.ordersChange,
-      icon:     'cart-outline'   as const,
-      iconBg:   '#D1FAE5',
+      title:     'Total Orders',
+      value:     mockStats.totalOrders.toLocaleString(),
+      change:    mockStats.ordersChange,
+      icon:      'cart-outline'   as const,
+      iconBg:    '#D1FAE5',
       iconColor: colors.success,
     },
     {
-      title:    'Customers',
-      value:    mockStats.totalCustomers.toLocaleString(),
-      change:   mockStats.customersChange,
-      icon:     'people-outline' as const,
-      iconBg:   '#FEF3C7',
+      title:     'Customers',
+      value:     mockStats.totalCustomers.toLocaleString(),
+      change:    mockStats.customersChange,
+      icon:      'people-outline' as const,
+      iconBg:    '#FEF3C7',
       iconColor: '#B45309',
     },
     {
-      title:    'Products',
-      value:    (page1?.total ?? 0).toLocaleString(),
-      change:   mockStats.productsChange,
-      icon:     'cube-outline'   as const,
-      iconBg:   '#FEE2E2',
+      // ✅ Sum across all stores
+      title:     'Products',
+      value:     totalProducts.toLocaleString(),
+      change:    mockStats.productsChange,
+      icon:      'cube-outline'   as const,
+      iconBg:    '#FEE2E2',
       iconColor: colors.danger,
     },
   ];
@@ -134,8 +152,6 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   if (isVerifying) {
     return <View style={g.centred}><ActivityIndicator /></View>;
   }
-
-  console.log(user)
 
   return (
     <ScrollView
@@ -183,27 +199,26 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <StatCards stats={dashboardStats} />
       </View>
 
-      {/* Recent Orders — read from store, no local fetch */}
+      {/* Recent Orders */}
       <View style={g.mb4}>
         <RecentOrdersCard
-          // orders={orders ?? []}
           orders={mockOrders}
           onViewAll={() => navigation.navigate('AllOrders')}
         />
       </View>
 
-      {/* Low Stock Alerts — read from store */}
+      {/* Low Stock — now receives all stores' data with switcher built-in */}
       <View style={g.mb4}>
         <LowStockAlerts
-          products={page1?.products ?? []}
-          onViewAll={() => navigation.navigate('LowStock')}
+          storeData={allStorePage1}
+          activeStoreUsername={activeStore?.username ?? ''}
+          onViewAll={() => navigation.navigate('MoreTab', { screen: 'LowStock' })}
         />
       </View>
     </ScrollView>
   );
 };
 
-// Only screen-specific overrides that can't live in globalStyles
 const styles = StyleSheet.create({
   quickActionsCard: {
     marginBottom: spacing[4],

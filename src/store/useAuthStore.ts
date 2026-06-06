@@ -1,17 +1,19 @@
 // src/store/useAuthStore.ts
 import { create } from 'zustand';
-import { login } from '../services/authService';
+import { login, register } from '../services/authService';
 import { tokenStorage } from '../utils/tokenStorage';
 import { useAppStore } from './useAppStore';
 import * as Device from 'expo-device';
 import { getDeviceToken } from '../utils/getDeviceToken';
 import { Platform } from 'react-native';
+import type { AuthRegisterParams } from '../types/types';
 
 interface AuthState {
   isLoading: boolean;
   error:     string | null;
   signIn:    (username: string, password: string) => Promise<'ok' | 'no-store' | 'error'>;
   signOut:   () => Promise<void>;
+  register:  (body: AuthRegisterParams) => Promise<'ok' | 'conflict' | 'error'>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -42,7 +44,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       await tokenStorage.saveToken(token);
 
-      // Force re-bootstrap even if authStatus was previously 'authenticated'
       useAppStore.getState().clear();
       const result = await useAppStore.getState().bootstrap();
 
@@ -50,7 +51,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ isLoading: false, error: null });
         return 'ok';
       }
-
       if (result === 'no-store') {
         set({ isLoading: false, error: null });
         return 'no-store';
@@ -61,6 +61,22 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err: any) {
       set({ isLoading: false, error: err?.message || 'Login failed.' });
       return 'error';
+    }
+  },
+
+  register: async (body) => {
+    set({ isLoading: true, error: null });
+    try {
+      await register(body);
+      set({ isLoading: false });
+      return 'ok';
+    } catch (err: any) {
+      const is409 =
+        err?.status === 409 ||
+        err?.message?.toLowerCase().includes('conflict') ||
+        err?.message?.toLowerCase().includes('already exists');
+      set({ isLoading: false, error: err?.message || 'Registration failed.' });
+      return is409 ? 'conflict' : 'error';
     }
   },
 

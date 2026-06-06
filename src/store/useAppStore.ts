@@ -52,7 +52,7 @@ export interface Category {
 }
 
 /** One page of products as stored in cache */
-interface ProductPage {
+export interface ProductPage {
   products:  Product[];
   total:     number;
   hasMore:   boolean;

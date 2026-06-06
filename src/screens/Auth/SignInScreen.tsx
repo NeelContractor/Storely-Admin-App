@@ -11,11 +11,12 @@ import { Ionicons }          from '@expo/vector-icons';
 
 import { InputField }   from '../../components/ui/InputField';
 import { Button }        from '../../components/ui/Button';
-import { g }             from '../../theme/globalStyles';          // ← global styles
+import { g }             from '../../theme/globalStyles';        
 import { colors }        from '../../theme/colors';
 import { spacing }       from '../../theme/typography';
 import { useTheme }      from '../../theme/ThemeContext';
 import { useAuthStore }  from '../../store/useAuthStore';
+import { Link } from '@react-navigation/native';
 
 export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -114,6 +115,14 @@ export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           size="lg"
         />
       </ScrollView>
+      <View style={g.authFooterRow}>
+        <Text style={[g.body, { color: themeColors.textSecondary }]}>
+          Don't have an account?{'  '}
+        </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+          <Text style={g.textLink}>Register here</Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 };
