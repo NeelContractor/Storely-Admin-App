@@ -1,40 +1,51 @@
-// src/utils/getDeviceToken.ts
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import { Platform } from 'react-native';
-import Constants from 'expo-constants';
+// // src/utils/getDeviceToken.ts
 
-export async function getDeviceToken(): Promise<string> {
-  // Push tokens only work on real devices
-  if (!Device.isDevice) return '';
+// // import * as Notifications from 'expo-notifications';
+// import * as Device from 'expo-device';
+// import { Platform } from 'react-native';
+// import Constants from 'expo-constants';
 
-  // Need a projectId for push tokens — skip gracefully if not configured
-  const projectId = Constants.expoConfig?.extra?.eas?.projectId
-    ?? Constants.easConfig?.projectId;
+// export async function getDeviceToken(): Promise<string> {
+//   // Skip Expo Go
+//   if (Constants.executionEnvironment === 'storeClient') {
+//     return '';
+//   }
 
-  if (!projectId) return '';
+//   // Push tokens only work on physical devices
+//   if (!Device.isDevice) {
+//     return '';
+//   }
 
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  let finalStatus = existing;
+//   const projectId =
+//     Constants.expoConfig?.extra?.eas?.projectId ??
+//     Constants.easConfig?.projectId;
 
-  if (existing !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
+//   if (!projectId) {
+//     return '';
+//   }
 
-  if (finalStatus !== 'granted') return '';
+//   const { status: existing } = await Notifications.getPermissionsAsync();
+//   let finalStatus = existing;
 
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.DEFAULT,
-    });
-  }
+//   if (existing !== 'granted') {
+//     const { status } = await Notifications.requestPermissionsAsync();
+//     finalStatus = status;
+//   }
 
-  try {
-    const token = await Notifications.getExpoPushTokenAsync({ projectId });
-    return token.data;
-  } catch {
-    return '';
-  }
-}
+//   if (finalStatus !== 'granted') {
+//     return '';
+//   }
+
+//   if (Platform.OS === 'android') {
+//     await Notifications.setNotificationChannelAsync('default', {
+//       name: 'default',
+//       importance: Notifications.AndroidImportance.DEFAULT,
+//     });
+//   }
+
+//   const token = await Notifications.getExpoPushTokenAsync({
+//     projectId,
+//   });
+
+//   return token.data;
+// }

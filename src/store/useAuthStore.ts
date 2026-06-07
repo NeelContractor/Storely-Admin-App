@@ -1,44 +1,51 @@
-// src/store/useAuthStore.ts
 import { create } from 'zustand';
 import { login, register } from '../services/authService';
 import { tokenStorage } from '../utils/tokenStorage';
 import { useAppStore } from './useAppStore';
 import * as Device from 'expo-device';
-import { getDeviceToken } from '../utils/getDeviceToken';
+import * as Application from 'expo-application';
 import { Platform } from 'react-native';
 import type { AuthRegisterParams } from '../types/types';
 
 interface AuthState {
   isLoading: boolean;
-  error:     string | null;
-  signIn:    (username: string, password: string) => Promise<'ok' | 'no-store' | 'error'>;
-  signOut:   () => Promise<void>;
-  register:  (body: AuthRegisterParams) => Promise<'ok' | 'conflict' | 'error'>;
+  error: string | null;
+  signIn: (username: string, password: string) => Promise<'ok' | 'no-store' | 'error'>;
+  signOut: () => Promise<void>;
+  register: (body: AuthRegisterParams) => Promise<'ok' | 'conflict' | 'error'>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
-  error:     null,
+  error: null,
 
   signIn: async (username, password) => {
     set({ isLoading: true, error: null });
+
     try {
-      const deviceToken = await getDeviceToken();
+      const deviceToken =
+        Platform.OS === 'android'
+          ? Application.getAndroidId() ?? ''
+          : (await Application.getIosIdForVendorAsync()) ?? '';
 
       const response = await login({
         username,
         password,
-        deviceId:    Device.modelId    ?? 'unknown',
-        deviceType:  Platform.OS === 'ios' ? 'ios' : 'android',
+        deviceId: deviceToken || Device.modelId || 'unknown',
+        deviceType: Platform.OS,
         deviceToken,
-        deviceName:  Device.deviceName ?? 'unknown',
-        deviceModel: Device.modelName  ?? 'unknown',
-        timestamp:   Date.now(),
+        deviceName: Device.deviceName ?? 'unknown',
+        deviceModel: Device.modelName ?? 'unknown',
+        timestamp: Date.now(),
       });
 
       const token = response?.data?.token;
+
       if (!token) {
-        set({ isLoading: false, error: 'Login succeeded but no token received.' });
+        set({
+          isLoading: false,
+          error: 'Login succeeded but no token received.',
+        });
         return 'error';
       }
 
@@ -51,21 +58,31 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ isLoading: false, error: null });
         return 'ok';
       }
+
       if (result === 'no-store') {
         set({ isLoading: false, error: null });
         return 'no-store';
       }
 
-      set({ isLoading: false, error: 'Failed to load account data.' });
+      set({
+        isLoading: false,
+        error: 'Failed to load account data.',
+      });
+
       return 'error';
     } catch (err: any) {
-      set({ isLoading: false, error: err?.message || 'Login failed.' });
+      set({
+        isLoading: false,
+        error: err?.message || 'Login failed.',
+      });
+
       return 'error';
     }
   },
 
   register: async (body) => {
     set({ isLoading: true, error: null });
+
     try {
       await register(body);
       set({ isLoading: false });
@@ -75,7 +92,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         err?.status === 409 ||
         err?.message?.toLowerCase().includes('conflict') ||
         err?.message?.toLowerCase().includes('already exists');
-      set({ isLoading: false, error: err?.message || 'Registration failed.' });
+
+      set({
+        isLoading: false,
+        error: err?.message || 'Registration failed.',
+      });
+
       return is409 ? 'conflict' : 'error';
     }
   },

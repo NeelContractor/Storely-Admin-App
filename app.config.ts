@@ -1,7 +1,7 @@
 // app.config.ts
-import { ExpoConfig, ConfigContext } from 'expo/config';
+import { ConfigContext } from 'expo/config';
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
+export default ({ config }: ConfigContext) => ({
   ...config,
   
   name: 'Storely',

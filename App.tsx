@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
 
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
@@ -23,13 +23,18 @@ const AppContent = () => {
 };
 
 export default function App() {
-  const [ready, setReady] = React.useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    tokenStorage.hydrate().then(() => setReady(true));
+    async function initialize() {
+      await tokenStorage.hydrate();
+      setReady(true);
+    }
+
+    initialize();
   }, []);
-  
-  if (!ready) return null; // or a splash screen
+
+  if (!ready) return null;
 
   return (
     <GestureHandlerRootView style={styles.root}>
@@ -43,5 +48,7 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: {
+    flex: 1,
+  },
 });
