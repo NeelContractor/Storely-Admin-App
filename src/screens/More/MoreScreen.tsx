@@ -20,12 +20,12 @@ interface MoreItem {
 const MORE_ITEMS: MoreItem[] = [
   { label: 'Analytics',     icon: 'bar-chart-outline',    color: colors.primary, route: 'Analytics', description: 'Revenue & sales reports'  },
   { label: 'Settings',      icon: 'settings-outline',     color: '#8B5CF6',      route: 'Settings',  description: 'App & account settings'   },
-  { label: 'Marketing',     icon: 'megaphone-outline',    color: '#F59E0B',      route: 'Marketing', description: 'Campaigns & coupons'      },
+  // { label: 'Marketing',     icon: 'megaphone-outline',    color: '#F59E0B',      route: 'Marketing', description: 'Campaigns & coupons'      },
   { label: 'Store Profile', icon: 'storefront-outline',   color: '#10B981',      route: 'Store',     description: 'Manage your store'        },
   { label: 'Categories',    icon: 'grid-outline',         color: '#0891B2',      route: 'Categories',description: 'Product categories'       },
   { label: 'Low Stock',     icon: 'warning-outline',      color: colors.danger,  route: 'LowStock',  description: 'Items running low'        },
   { label: 'Reviews',       icon: 'star-outline',         color: '#F59E0B',      route: 'Reviews',   description: 'Customer feedback'        },
-  { label: 'Messages',      icon: 'chatbubbles-outline',  color: '#EC4899',      route: 'Messages',  description: 'Customer messages'        },
+  // { label: 'Messages',      icon: 'chatbubbles-outline',  color: '#EC4899',      route: 'Messages',  description: 'Customer messages'        },
 ];
 
 export const MoreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
