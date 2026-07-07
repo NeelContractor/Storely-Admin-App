@@ -25,7 +25,7 @@ const MetricCard: React.FC<{
   return (
     <Card style={styles.metricCard}>
       <Ionicons name={icon} size={20} color={colors.primary} />
-      <Text style={[styles.metricValue, { color: themeColors.text }]}>{value}</Text>
+      <Text style={[styles.metricValue, { color: themeColors.textPrimary }]}>{value}</Text>
       <Text style={[styles.metricTitle, { color: themeColors.textSecondary }]}>{title}</Text>
       <View style={[styles.changePill, { backgroundColor: isPos ? colors.successLight : colors.dangerLight }]}>
         <Ionicons name={isPos ? 'arrow-up' : 'arrow-down'} size={10} color={isPos ? colors.success : colors.danger} />
@@ -109,7 +109,7 @@ export const AnalyticsScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={[styles.container, { backgroundColor: themeColors.pageBg }]}
       contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing[6] }]}
       showsVerticalScrollIndicator={false}
     >
@@ -122,7 +122,7 @@ export const AnalyticsScreen: React.FC = () => {
             style={[
               styles.periodBtn,
               {
-                backgroundColor: period === p ? colors.primary : themeColors.card,
+                backgroundColor: period === p ? colors.primary : themeColors.cardBg,
                 borderColor: period === p ? colors.primary : themeColors.border,
               },
             ]}
@@ -164,7 +164,7 @@ export const AnalyticsScreen: React.FC = () => {
 
       {/* Revenue Chart */}
       <Card style={styles.chartCard}>
-        <Text style={[styles.chartTitle, { color: themeColors.text }]}>Revenue Overview</Text>
+        <Text style={[styles.chartTitle, { color: themeColors.textPrimary }]}>Revenue Overview</Text>
         <Text style={[styles.chartSub, { color: themeColors.textSecondary }]}>Monthly revenue vs expenses</Text>
         <View style={styles.legend}>
           <View style={styles.legendItem}>
@@ -185,7 +185,7 @@ export const AnalyticsScreen: React.FC = () => {
 
       {/* Sales Chart */}
       <Card style={styles.chartCard}>
-        <Text style={[styles.chartTitle, { color: themeColors.text }]}>Sales This Week</Text>
+        <Text style={[styles.chartTitle, { color: themeColors.textPrimary }]}>Sales This Week</Text>
         <Text style={[styles.chartSub, { color: themeColors.textSecondary }]}>Daily sales performance</Text>
         <SimpleLineChart
           data={mockSalesData.datasets[0].data}
@@ -196,7 +196,7 @@ export const AnalyticsScreen: React.FC = () => {
 
       {/* Top Categories */}
       <Card>
-        <Text style={[styles.chartTitle, { color: themeColors.text }]}>Top Categories</Text>
+        <Text style={[styles.chartTitle, { color: themeColors.textPrimary }]}>Top Categories</Text>
         <View style={styles.categories}>
           {[
             { name: 'Electronics', value: 42, color: colors.primary },
@@ -207,7 +207,7 @@ export const AnalyticsScreen: React.FC = () => {
             <View key={cat.name} style={styles.catRow}>
               <View style={styles.catInfo}>
                 <View style={[styles.catDot, { backgroundColor: cat.color }]} />
-                <Text style={[styles.catName, { color: themeColors.text }]}>{cat.name}</Text>
+                <Text style={[styles.catName, { color: themeColors.textPrimary }]}>{cat.name}</Text>
               </View>
               <View style={[styles.catBarBg, { backgroundColor: themeColors.border }]}>
                 <View style={[styles.catBar, { width: `${cat.value}%`, backgroundColor: cat.color }]} />

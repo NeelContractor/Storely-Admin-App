@@ -18,7 +18,7 @@ const variantStyles: Record<BadgeVariant, { bg: string; text: string }> = {
   warning: { bg: colors.warningLight, text: '#B45309' },
   danger: { bg: colors.dangerLight, text: colors.danger },
   info: { bg: colors.infoLight, text: colors.info },
-  default: { bg: colors.bgLight, text: colors.textSecondary },
+  default: { bg: colors.surfaceSecondary, text: colors.textSecondary },
 };
 
 export const Badge: React.FC<BadgeProps> = ({ label, variant = 'default', size = 'md' }) => {

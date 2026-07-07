@@ -117,7 +117,7 @@ const SectionHeader: React.FC<{ icon: string; title: string; accent?: string }> 
       <View style={[sh.wrap, { backgroundColor: col + '18' }]}>
         <Ionicons name={icon as any} size={16} color={col} />
       </View>
-      <Text style={[sh.title, { color: c.text }]}>{title}</Text>
+      <Text style={[sh.title, { color: c.textPrimary }]}>{title}</Text>
     </View>
   );
 };
@@ -279,13 +279,13 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
   };
 
   // ── Shared input style ────────────────────────────────────────────────────────
-  const inputBase = [styles.input, { backgroundColor: themeColors.card, borderColor: themeColors.border, color: themeColors.text }];
+  const inputBase = [styles.input, { backgroundColor: themeColors.inputBg, borderColor: themeColors.inputBorder, color: themeColors.inputText }];
   const inp = (field?: keyof FieldError) =>
     field && errors[field] ? [...inputBase, styles.inputError] : inputBase;
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={[styles.container, { backgroundColor: themeColors.pageBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
@@ -295,12 +295,12 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
       >
 
         {/* ── Progress bar ── */}
-        <View style={[styles.progressCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.progressCard, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
           <View style={styles.progressHeader}>
             <Text style={[styles.progressLabel, { color: themeColors.textSecondary }]}>
               Listing completeness
             </Text>
-            <Text style={[styles.progressPct, { color: progress === 100 ? colors.success : themeColors.text }]}>
+            <Text style={[styles.progressPct, { color: progress === 100 ? colors.success : themeColors.textPrimary }]}>
               {progress}%
             </Text>
           </View>
@@ -324,7 +324,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         </View>
 
         {/* ── BASIC INFO ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
           <SectionHeader icon="information-circle-outline" title="Basic Info" />
 
           <Field label="Product Name" required error={errors.name}>
@@ -339,8 +339,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
 
           <Field label="Slug (URL)" required error={errors.slug}>
             <View style={styles.slugRow}>
-              <View style={[styles.slugPrefix, { backgroundColor: themeColors.background, borderColor: themeColors.border }]}>
-                <Text style={[styles.slugPrefixText, { color: themeColors.textSecondary }]}>/products/</Text>
+              <View style={[{ backgroundColor: themeColors.pageBg, borderColor: themeColors.border }]}>
               </View>
               <TextInput
                 style={[inp('slug'), styles.slugInput]}
@@ -390,7 +389,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         </View>
 
         {/* ── MEDIA ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
           <SectionHeader icon="images-outline" title="Media" accent="#8B5CF6" />
 
           <Field label="Main Image (Cover)" error={errors.imageUrl}>
@@ -439,7 +438,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         </View>
 
         {/* ── PRICING ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
           <SectionHeader icon="pricetag-outline" title="Pricing" accent={colors.success} />
 
           {/* Currency */}
@@ -448,18 +447,18 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
               style={[inp(), styles.pickerBtn]}
               onPress={() => setShowCurrencyPicker(v => !v)}
             >
-              <Text style={{ color: themeColors.text, fontSize: typography.sizes.base }}>{form.currency}</Text>
+              <Text style={{ color: themeColors.textPrimary, fontSize: typography.sizes.base }}>{form.currency}</Text>
               <Ionicons name={showCurrencyPicker ? 'chevron-up' : 'chevron-down'} size={16} color={themeColors.textSecondary} />
             </TouchableOpacity>
             {showCurrencyPicker && (
-              <View style={[styles.pickerDropdown, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+              <View style={[styles.pickerDropdown, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
                 {CURRENCIES.map(c => (
                   <TouchableOpacity
                     key={c}
                     style={[styles.pickerOption, form.currency === c && { backgroundColor: colors.primary + '14' }]}
                     onPress={() => { setField('currency', c); setShowCurrencyPicker(false); }}
                   >
-                    <Text style={{ color: themeColors.text, fontSize: typography.sizes.base }}>
+                    <Text style={{ color: themeColors.textPrimary, fontSize: typography.sizes.base }}>
                       {c === 'INR' ? 'INR (₹) — Indian Rupee' : 'USD ($) — US Dollar'}
                     </Text>
                     {form.currency === c && <Ionicons name="checkmark" size={16} color={colors.primary} />}
@@ -509,7 +508,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         </View>
 
         {/* ── INVENTORY ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
           <SectionHeader icon="cube-outline" title="Inventory" accent="#B45309" />
 
           {/* Availability + Stock side-by-side */}
@@ -525,7 +524,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                   }}
                 >
                   <View style={[styles.availDot, { backgroundColor: form.inStock ? colors.success : colors.danger }]} />
-                  <Text style={{ color: themeColors.text, fontSize: typography.sizes.sm, flex: 1 }}>
+                  <Text style={{ color: themeColors.textPrimary, fontSize: typography.sizes.sm, flex: 1 }}>
                     {form.inStock ? 'In Stock' : 'Out of Stock'}
                   </Text>
                   <Ionicons name="chevron-down" size={14} color={themeColors.textSecondary} />
@@ -550,7 +549,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
           {/* Featured toggle */}
           <View style={styles.toggleRow}>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.toggleLabel, { color: themeColors.text }]}>Featured Product</Text>
+              <Text style={[styles.toggleLabel, { color: themeColors.textPrimary }]}>Featured Product</Text>
               <Text style={[styles.toggleSub, { color: themeColors.textSecondary }]}>
                 Show on featured / highlights section
               </Text>
@@ -565,7 +564,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
         </View>
 
         {/* ── CATEGORIES ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
           <SectionHeader icon="folder-outline" title="Categories" accent={colors.success} />
           {errors.categoryIds && (
             <Text style={[styles.catError, { color: colors.danger }]}>{errors.categoryIds}</Text>
@@ -586,7 +585,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                     style={[
                       styles.catChip,
                       {
-                        backgroundColor: selected ? colors.primary        : themeColors.background,
+                        backgroundColor: selected ? colors.primary        : themeColors.pageBg,
                         borderColor:     selected ? colors.primary        : themeColors.border,
                       },
                     ]}
@@ -594,7 +593,7 @@ export const AddProductScreen: React.FC<{ navigation: any }> = ({ navigation }) 
                     activeOpacity={0.7}
                   >
                     {selected && <Ionicons name="checkmark" size={12} color={colors.white} />}
-                    <Text style={[styles.catText, { color: selected ? colors.white : themeColors.text }]}>
+                    <Text style={[styles.catText, { color: selected ? colors.white : themeColors.textPrimary }]}>
                       {cat.name}
                     </Text>
                   </TouchableOpacity>

@@ -36,7 +36,7 @@ export const ProductsStack: React.FC = () => {
             />
           );
         },
-        cardStyle: { backgroundColor: themeColors.background },
+        cardStyle: { backgroundColor: themeColors.cardBg },
       })}
     >
       <Stack.Screen name="AllProducts" component={AllProductsScreen} />

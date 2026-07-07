@@ -35,7 +35,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       style={[
         styles.header,
         {
-          backgroundColor: themeColors.card,
+          backgroundColor: themeColors.cardBg,
           paddingTop: insets.top + spacing[2],
           borderBottomColor: themeColors.border,
         },
@@ -45,16 +45,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <View style={styles.left}>
         {showBack ? (
           <TouchableOpacity onPress={onBackPress} style={styles.iconBtn}>
-            <Ionicons name="arrow-back" size={22} color={themeColors.text} />
+            <Ionicons name="arrow-back" size={22} color={themeColors.textPrimary} />
           </TouchableOpacity>
         ) : showMenuButton ? (
           <TouchableOpacity onPress={onMenuPress} style={styles.iconBtn}>
-            <Ionicons name="menu-outline" size={26} color={themeColors.text} />
+            <Ionicons name="menu-outline" size={26} color={themeColors.textPrimary} />
           </TouchableOpacity>
         ) : null}
 
         {title ? (
-          <Text style={[styles.title, { color: themeColors.text }]}>{title}</Text>
+          <Text style={[styles.title, { color: themeColors.textPrimary }]}>{title}</Text>
         ) : (
           <View style={styles.brand}>
             <Image
@@ -72,11 +72,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <Ionicons
             name={isDark ? 'sunny-outline' : 'moon-outline'}
             size={20}
-            color={themeColors.text}
+            color={themeColors.textPrimary}
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.notifBtn}>
-          <Ionicons name="notifications-outline" size={20} color={themeColors.text} />
+          <Ionicons name="notifications-outline" size={20} color={themeColors.textPrimary} />
         </TouchableOpacity>
         {user?.profileImage ? (
           <Image

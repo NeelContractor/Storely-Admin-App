@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, TextInputProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
 import { useTheme } from '../../theme/ThemeContext';
 
@@ -24,33 +23,33 @@ export const InputField: React.FC<InputFieldProps> = ({
   isPassword,
   ...props
 }) => {
-  const { colors: themeColors, isDark } = useTheme();
+  const { colors: themeColors } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <View style={styles.container}>
       {label && (
-        <Text style={[styles.label, { color: themeColors.text }]}>{label}</Text>
+        <Text style={[styles.label, { color: themeColors.textPrimary }]}>{label}</Text>
       )}
       <View
         style={[
           styles.inputWrapper,
           {
-            borderColor: error ? colors.danger : themeColors.border,
-            backgroundColor: isDark ? colors.bgCardDark : colors.white,
+            borderColor: error ? themeColors.danger : themeColors.border,
+            backgroundColor: themeColors.cardBg,
           },
         ]}
       >
         {leftIcon && (
-          <Ionicons name={leftIcon} size={18} color={colors.textMuted} style={styles.leftIcon} />
+          <Ionicons name={leftIcon} size={18} color={themeColors.textMuted} style={styles.leftIcon} />
         )}
         <TextInput
           style={[
             styles.input,
-            { color: themeColors.text },
+            { color: themeColors.textPrimary },
             leftIcon ? styles.inputWithLeft : null,
           ]}
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={themeColors.textMuted}
           secureTextEntry={isPassword && !showPassword}
           {...props}
         />
@@ -62,17 +61,17 @@ export const InputField: React.FC<InputFieldProps> = ({
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={18}
-              color={colors.textMuted}
+              color={themeColors.textMuted}
             />
           </TouchableOpacity>
         )}
         {rightIcon && !isPassword && (
           <TouchableOpacity onPress={onRightIconPress} style={styles.rightIcon}>
-            <Ionicons name={rightIcon} size={18} color={colors.textMuted} />
+            <Ionicons name={rightIcon} size={18} color={themeColors.textMuted} />
           </TouchableOpacity>
         )}
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={[styles.error, { color: themeColors.danger }]}>{error}</Text>}
     </View>
   );
 };
@@ -100,5 +99,5 @@ const styles = StyleSheet.create({
   inputWithLeft: { paddingLeft: spacing[2] },
   leftIcon: { marginLeft: spacing[3] },
   rightIcon: { marginRight: spacing[3], padding: spacing[1] },
-  error: { fontSize: typography.sizes.sm, color: colors.danger, marginTop: spacing[1] },
+  error: { fontSize: typography.sizes.sm, marginTop: spacing[1] },
 });

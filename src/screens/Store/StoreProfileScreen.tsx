@@ -155,8 +155,8 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ value, onChange, enabled 
             style={[
               ts.card,
               {
-                backgroundColor: active ? option.accent + '12' : c.card,
-                borderColor:     active ? option.accent         : c.border,
+                backgroundColor: active ? option.accent + '12' : c.cardBg,
+                borderColor:     active ? option.accent         : c.cardBorder,
               },
               !enabled && ts.cardDisabled,
             ]}
@@ -168,7 +168,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ value, onChange, enabled 
 
             {/* Info */}
             <View style={ts.info}>
-              <Text style={[ts.label, { color: active ? option.accent : c.text }]} numberOfLines={1}>
+              <Text style={[ts.label, { color: active ? option.accent : c.textPrimary }]} numberOfLines={1}>
                 {option.label}
               </Text>
               <View style={[ts.tag, { backgroundColor: option.tagColor + '18' }]}>
@@ -305,7 +305,7 @@ const ImageUploadButton: React.FC<ImageUploadProps> = ({
 
   return (
     <TouchableOpacity
-      style={[iu.placeholder, { width, height, borderColor: c.border, backgroundColor: c.card }]}
+      style={[iu.placeholder, { width, height, borderColor: c.cardBorder, backgroundColor: c.cardBg }]}
       onPress={pick}
       disabled={uploading}
       activeOpacity={0.75}
@@ -347,14 +347,14 @@ const StorePill: React.FC<{
       style={[
         sp.pill,
         {
-          backgroundColor: active ? colors.primary        : c.card,
-          borderColor:     active ? colors.primary        : c.border,
+          backgroundColor: active ? colors.primary        : c.cardBg,
+          borderColor:     active ? colors.primary        : c.cardBorder,
         },
       ]}
       onPress={onPress}
       activeOpacity={0.75}
     >
-      <View style={[sp.logo, { backgroundColor: active ? 'rgba(255,255,255,0.2)' : c.background }]}>
+      <View style={[sp.logo, { backgroundColor: active ? 'rgba(255,255,255,0.2)' : c.pageBg }]}>
         {store.logoUrl
           ? <Image source={{ uri: store.logoUrl }} style={sp.logoImg} resizeMode="cover" />
           : <Text style={[sp.logoInitial, { color: active ? colors.white : c.textSecondary }]}>
@@ -363,7 +363,7 @@ const StorePill: React.FC<{
         }
       </View>
       <View style={sp.info}>
-        <Text style={[sp.name, { color: active ? colors.white : c.text }]} numberOfLines={1}>
+        <Text style={[sp.name, { color: active ? colors.white : c.textPrimary }]} numberOfLines={1}>
           {store.name}
         </Text>
         <Text style={[sp.username, { color: active ? 'rgba(255,255,255,0.7)' : c.textSecondary }]} numberOfLines={1}>
@@ -405,7 +405,7 @@ const SectionHeader: React.FC<{ icon: string; title: string; color?: string }> =
       <View style={[sh.iconWrap, { backgroundColor: col + '18' }]}>
         <Ionicons name={icon as any} size={15} color={col} />
       </View>
-      <Text style={[sh.title, { color: c.text }]}>{title}</Text>
+      <Text style={[sh.title, { color: c.textPrimary }]}>{title}</Text>
     </View>
   );
 };
@@ -520,15 +520,15 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
   const inputStyle = [
     styles.input,
     {
-      backgroundColor: isEditing ? themeColors.card : themeColors.background,
+      backgroundColor: isEditing ? themeColors.cardBg : themeColors.pageBg,
       borderColor:     themeColors.border,
-      color:           themeColors.text,
+      color:           themeColors.textPrimary,
     },
   ];
 
   if (!stores.length) {
     return (
-      <View style={[styles.centered, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.centered, { backgroundColor: themeColors.pageBg }]}>
         <Ionicons name="storefront-outline" size={48} color={colors.textMuted} />
         <Text style={{ color: themeColors.textSecondary, marginTop: spacing[3] }}>No stores found</Text>
       </View>
@@ -537,7 +537,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={[styles.container, { backgroundColor: themeColors.pageBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
@@ -592,7 +592,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
             </View>
           )}
 
-          <View style={[styles.logoWrap, { borderColor: themeColors.background }]}>
+          <View style={[styles.logoWrap, { borderColor: themeColors.pageBg }]}>
             {isEditing ? (
               <ImageUploadButton
                 uri={form.logoUrl || undefined}
@@ -613,13 +613,13 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
           </View>
 
           <View style={styles.heroInfo}>
-            <Text style={[styles.heroName, { color: themeColors.text }]}>{selectedStore.name}</Text>
+            <Text style={[styles.heroName, { color: themeColors.textPrimary }]}>{selectedStore.name}</Text>
             <Text style={styles.heroUsername}>@{selectedStore.username}</Text>
           </View>
         </View>
 
         {/* ── Action row ── */}
-        <View style={[styles.actionRow, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.actionRow, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
           <View style={styles.statItem}>
             {/* Show a colour dot + short theme label */}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -627,7 +627,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
                 width: 8, height: 8, borderRadius: 4,
                 backgroundColor: activeThemeOption.accent,
               }} />
-              <Text style={[styles.statValue, { color: themeColors.text }]} numberOfLines={1}>
+              <Text style={[styles.statValue, { color: themeColors.textPrimary }]} numberOfLines={1}>
                 {activeThemeOption.label}
               </Text>
             </View>
@@ -635,7 +635,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
           </View>
           <View style={[styles.statDivider, { backgroundColor: themeColors.border }]} />
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: themeColors.text }]} numberOfLines={1}>
+            <Text style={[styles.statValue, { color: themeColors.textPrimary }]} numberOfLines={1}>
               {stores.length}
             </Text>
             <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Total Stores</Text>
@@ -648,16 +648,16 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
             <Ionicons
               name={isEditing ? 'close' : 'pencil'}
               size={15}
-              color={isEditing ? themeColors.text : colors.white}
+              color={isEditing ? themeColors.textPrimary : colors.white}
             />
-            <Text style={[styles.editBtnText, { color: isEditing ? themeColors.text : colors.white }]}>
+            <Text style={[styles.editBtnText, { color: isEditing ? themeColors.textPrimary : colors.white }]}>
               {isEditing ? 'Cancel' : 'Edit'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* ── Store Info ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
           <SectionHeader icon="storefront-outline" title="Store Info" />
 
           <LabeledField label="Store Name" hint="Displayed to customers on your storefront">
@@ -697,7 +697,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
         </View>
 
         {/* ── Media ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
           <SectionHeader icon="images-outline" title="Media" color="#8B5CF6" />
 
           <LabeledField label="Logo">
@@ -740,7 +740,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
         </View>
 
         {/* ── Social Links ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
           <SectionHeader icon="share-social-outline" title="Social Links" color="#0891b2" />
 
           {([
@@ -770,7 +770,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
         </View>
 
         {/* ── Read-only Details ── */}
-        <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
           <SectionHeader icon="information-circle-outline" title="Store Details" color={colors.success} />
           {[
             { label: 'Username',   value: selectedStore.username },
@@ -788,7 +788,7 @@ export const StoreProfileScreen: React.FC<{ navigation: any }> = () => {
               ]}
             >
               <Text style={[styles.infoLabel, { color: themeColors.textSecondary }]}>{row.label}</Text>
-              <Text style={[styles.infoValue, { color: themeColors.text }]}>{row.value}</Text>
+              <Text style={[styles.infoValue, { color: themeColors.textPrimary }]}>{row.value}</Text>
             </View>
           ))}
         </View>

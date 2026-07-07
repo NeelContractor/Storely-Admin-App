@@ -34,7 +34,7 @@ export const MoreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={[styles.container, { backgroundColor: themeColors.pageBg }]}
       contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing[6] }]}
       showsVerticalScrollIndicator={false}
     >
@@ -50,7 +50,7 @@ export const MoreScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <View style={[styles.itemIcon, { backgroundColor: item.color + '15' }]}>
                 <Ionicons name={item.icon} size={26} color={item.color} />
               </View>
-              <Text style={[styles.itemLabel, { color: themeColors.text }]}>{item.label}</Text>
+              <Text style={[styles.itemLabel, { color: themeColors.textPrimary }]}>{item.label}</Text>
               <Text style={[styles.itemDesc, { color: themeColors.textSecondary }]} numberOfLines={1}>
                 {item.description}
               </Text>

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Badge } from '../../components/ui/Badge';
 import { Avatar } from '../../components/ui/Avatar';
 import { Card } from '../../components/ui/Card';
-import { Order } from '../../types';
+import { MockOrder } from '../../utils/mockData';
 import { colors } from '../../theme/colors';
 import { typography, spacing, radii, shadows } from '../../theme/typography';
 import { useTheme } from '../../theme/ThemeContext';
@@ -17,28 +17,28 @@ import { mockOrders } from '../../utils/mockData';
 
 const STATUS_FILTERS = ['All', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
-function getStatusVariant(status: Order['status']): 'success' | 'warning' | 'danger' | 'info' | 'default' {
-  const map: Record<Order['status'], 'success' | 'warning' | 'danger' | 'info' | 'default'> = {
+function getStatusVariant(status: MockOrder['status']): 'success' | 'warning' | 'danger' | 'info' | 'default' {
+  const map: Record<MockOrder['status'], 'success' | 'warning' | 'danger' | 'info' | 'default'> = {
     delivered: 'success', pending: 'warning', cancelled: 'danger',
     processing: 'info', shipped: 'info', returned: 'default',
   };
   return map[status];
 }
 
-const OrderRow: React.FC<{ order: Order }> = ({ order }) => {
+const OrderRow: React.FC<{ order: MockOrder }> = ({ order }) => {
   const { colors: themeColors } = useTheme();
   return (
     <TouchableOpacity activeOpacity={0.7}>
-      <View style={[styles.orderRow, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+      <View style={[styles.orderRow, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
         <Avatar name={order.customer.name} size={40} />
         <View style={styles.orderInfo}>
-          <Text style={[styles.orderNum, { color: themeColors.text }]}>{order.orderNumber}</Text>
+          <Text style={[styles.orderNum, { color: themeColors.textPrimary }]}>{order.orderNumber}</Text>
           <Text style={[styles.customerName, { color: themeColors.textSecondary }]}>
             {order.customer.name}
           </Text>
         </View>
         <View style={styles.orderRight}>
-          <Text style={[styles.total, { color: themeColors.text }]}>${order.total.toFixed(2)}</Text>
+          <Text style={[styles.total, { color: themeColors.textPrimary }]}>${order.total.toFixed(2)}</Text>
           <Badge
             label={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
             variant={getStatusVariant(order.status)}
@@ -69,12 +69,12 @@ export const AllOrdersScreen: React.FC = () => {
   }, [activeFilter, search]);
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <View style={[styles.container, { backgroundColor: themeColors.pageBg }]}>
       {/* Search Bar */}
-      <View style={[styles.searchBar, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+      <View style={[styles.searchBar, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
         <Ionicons name="search-outline" size={18} color={colors.textMuted} />
         <TextInput
-          style={[styles.searchInput, { color: themeColors.text }]}
+          style={[styles.searchInput, { color: themeColors.inputText }]}
           placeholder="Search orders..."
           placeholderTextColor={colors.textMuted}
           value={search}
@@ -100,7 +100,7 @@ export const AllOrdersScreen: React.FC = () => {
             style={[
               styles.filterChip,
               {
-                backgroundColor: activeFilter === item ? colors.primary : themeColors.card,
+                backgroundColor: activeFilter === item ? colors.primary : themeColors.cardBg,
                 borderColor: activeFilter === item ? colors.primary : themeColors.border,
               },
             ]}

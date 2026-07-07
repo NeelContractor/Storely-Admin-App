@@ -64,7 +64,7 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
           <View style={styles.warningIcon}>
             <Ionicons name="warning-outline" size={16} color={colors.warning} />
           </View>
-          <Text style={[styles.title, { color: themeColors.text }]}>Low Stock Alerts</Text>
+          <Text style={[styles.title, { color: themeColors.textPrimary }]}>Low Stock Alerts</Text>
         </View>
         <TouchableOpacity onPress={onViewAll}>
           <Text style={styles.viewAll}>View All</Text>
@@ -93,13 +93,13 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
                 style={[
                   styles.tab,
                   {
-                    backgroundColor: active ? colors.primary : themeColors.card,
+                    backgroundColor: active ? colors.primary : themeColors.cardBg,
                     borderColor:     active ? colors.primary : themeColors.border,
                   },
                 ]}
                 activeOpacity={0.75}
               >
-                <Text style={[styles.tabText, { color: active ? '#fff' : themeColors.text }]}>
+                <Text style={[styles.tabText, { color: active ? '#fff' : themeColors.textPrimary }]}>
                   {store.name}
                 </Text>
                 {lowCount > 0 && (
@@ -143,7 +143,7 @@ export const LowStockAlerts: React.FC<LowStockAlertsProps> = ({
           >
             <View style={styles.productInfo}>
               <Text
-                style={[styles.productName, { color: themeColors.text }]}
+                style={[styles.productName, { color: themeColors.textPrimary }]}
                 numberOfLines={1}
               >
                 {product.name}

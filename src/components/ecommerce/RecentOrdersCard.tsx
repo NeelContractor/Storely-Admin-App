@@ -35,7 +35,7 @@ export const RecentOrdersCard: React.FC<RecentOrdersCardProps> = ({ orders, onVi
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: themeColors.text }]}>Recent Orders</Text>
+        <Text style={[styles.title, { color: themeColors.textPrimary }]}>Recent Orders</Text>
         <TouchableOpacity onPress={onViewAll} style={styles.viewAll}>
           <Text style={styles.viewAllText}>View All</Text>
           <Ionicons name="arrow-forward" size={14} color={colors.primary} />
@@ -56,7 +56,7 @@ export const RecentOrdersCard: React.FC<RecentOrdersCardProps> = ({ orders, onVi
           <Avatar name={order.customer.name} size={38} />
           <View style={styles.rowInfo}>
             <Text
-              style={[styles.customerName, { color: themeColors.text }]}
+              style={[styles.customerName, { color: themeColors.textPrimary }]}
               numberOfLines={1}
             >
               {order.customer.name}
@@ -66,7 +66,7 @@ export const RecentOrdersCard: React.FC<RecentOrdersCardProps> = ({ orders, onVi
             </Text>
           </View>
           <View style={styles.rowRight}>
-            <Text style={[styles.amount, { color: themeColors.text }]}>
+            <Text style={[styles.amount, { color: themeColors.textPrimary }]}>
               ${order.total.toFixed(2)}
             </Text>
             <Badge

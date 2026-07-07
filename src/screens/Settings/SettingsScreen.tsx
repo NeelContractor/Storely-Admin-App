@@ -55,7 +55,7 @@ const SettingItem: React.FC<SettingItemProps> = ({
 
         <Text style={[
           styles.settingLabel,
-          { color: danger ? colors.danger : themeColors.text },
+          { color: danger ? colors.danger : themeColors.danger },
         ]}>
           {label}
         </Text>
@@ -124,7 +124,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: themeColors.background }]}
+      style={[styles.container, { backgroundColor: themeColors.pageBg }]}
       contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing[6] }]}
       showsVerticalScrollIndicator={false}
     >
@@ -136,7 +136,7 @@ export const SettingsScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
           : <Avatar name={user?.name} size={46} />}
 
         <View style={styles.profileInfo}>
-          <Text style={[styles.profileName, { color: themeColors.text }]}>
+          <Text style={[styles.profileName, { color: themeColors.textPrimary }]}>
             {user?.name ?? 'Admin'}
           </Text>
           <Text style={[styles.profileEmail, { color: themeColors.textSecondary }]}>

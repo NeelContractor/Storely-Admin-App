@@ -96,7 +96,7 @@ export const ImageUploadButton: React.FC<ImageUploadProps> = ({
     <TouchableOpacity
       style={[
         styles.placeholder,
-        { width: size, height: sizeH, borderColor: c.border, backgroundColor: c.card },
+        { width: size, height: sizeH, borderColor: c.border, backgroundColor: c.cardBg },
       ]}
       onPress={pick}
       disabled={uploading}

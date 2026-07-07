@@ -20,7 +20,7 @@ export const OrdersStack: React.FC = () => {
             onBackPress={() => navigation.goBack()}
           />
         ),
-        cardStyle: { backgroundColor: themeColors.background },
+        cardStyle: { backgroundColor: themeColors.cardBg },
       })}
     >
       <Stack.Screen name="AllOrders" component={AllOrdersScreen} />

@@ -12,7 +12,7 @@ import { Ionicons }          from '@expo/vector-icons';
 import { InputField }        from '../../components/ui/InputField';
 import { Button }            from '../../components/ui/Button';
 import { ImageUploadButton } from '../../components/ImageUploadButton';
-import { g }                 from '../../theme/globalStyles';
+// import { g }                 from '../../theme/globalStyles';
 import { colors }            from '../../theme/colors';
 import { spacing, typography, radii } from '../../theme/typography';
 import { useTheme }          from '../../theme/ThemeContext';
@@ -43,7 +43,7 @@ const INITIAL_FORM: FormState = {
 
 export const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { colors: themeColors, isDark, toggleTheme } = useTheme();
+  const { colors: themeColors, styles: g, isDark, toggleTheme } = useTheme();
   const { register, isLoading } = useAuthStore();
 
   const [form,   setForm]   = useState<FormState>(INITIAL_FORM);
@@ -112,7 +112,7 @@ export const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
   return (
     <KeyboardAvoidingView
-      style={[g.screen, { backgroundColor: themeColors.background }]}
+      style={[g.screen, { backgroundColor: themeColors.pageBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
@@ -163,12 +163,12 @@ export const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
       {/* ── Form ── */}
       <ScrollView
-        style={[g.authFormContainer, { backgroundColor: themeColors.background }]}
+        style={[g.authFormContainer, { backgroundColor: themeColors.pageBg }]}
         contentContainerStyle={g.authFormContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={[g.h2, { color: themeColors.text }]}>Get started</Text>
+        <Text style={[g.h2, { color: themeColors.textPrimary }]}>Get started</Text>
         <Text style={[g.body, g.mb6, { color: themeColors.textSecondary }]}>
           Fill in the details below to create your account.
         </Text>
@@ -185,7 +185,7 @@ export const RegisterScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
             onRemove={() => setForm(f => ({ ...f, image: '' }))}
           />
           <View style={styles.inlineAvatarInfo}>
-            <Text style={[styles.inlineAvatarTitle, { color: themeColors.text }]}>
+            <Text style={[styles.inlineAvatarTitle, { color: themeColors.textPrimary }]}>
               Profile Photo
             </Text>
             <Text style={[styles.inlineAvatarSub, { color: themeColors.textSecondary }]}>

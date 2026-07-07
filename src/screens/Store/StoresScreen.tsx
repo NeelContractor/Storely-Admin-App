@@ -52,7 +52,7 @@ const StoreCard: React.FC<{
   return (
     <View style={[
       card.wrap,
-      { backgroundColor: c.card, borderColor: isActive ? colors.primary : c.border },
+      { backgroundColor: c.cardBg, borderColor: isActive ? colors.primary : c.border },
       isActive && card.wrapActive,
     ]}>
 
@@ -79,7 +79,7 @@ const StoreCard: React.FC<{
           </View>
         )}
 
-        <View style={[card.logoWrap, { backgroundColor: c.card, borderColor: c.border }]}>
+        <View style={[card.logoWrap, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}>
           {store.logoUrl
             ? <Image source={{ uri: store.logoUrl }} style={card.logo} resizeMode="cover" />
             : <View style={[card.logoFallback, { backgroundColor: colors.primary + '18' }]}>
@@ -94,7 +94,7 @@ const StoreCard: React.FC<{
       <View style={card.body}>
         <View style={card.nameRow}>
           <View style={{ flex: 1 }}>
-            <Text style={[card.name, { color: c.text }]} numberOfLines={1}>{store.name}</Text>
+            <Text style={[card.name, { color: c.textPrimary }]} numberOfLines={1}>{store.name}</Text>
             <Text style={[card.username, { color: c.textSecondary }]}>@{store.username}</Text>
           </View>
           <View style={[card.themeBadge, { backgroundColor: themeStyle.bg }]}>
@@ -163,12 +163,12 @@ const StoreCard: React.FC<{
 
         {/* ✔ TODO Edit now navigates to StoreProfileScreen with store + startEditing flag */}
         <TouchableOpacity
-          style={[card.actionBtn, { backgroundColor: c.background, borderColor: c.border }]}
+          style={[card.actionBtn, { backgroundColor: c.pageBg, borderColor: c.border }]}
           onPress={() => onEdit(store)}
           activeOpacity={0.7}
         >
-          <Ionicons name="pencil-outline" size={15} color={c.text} />
-          <Text style={[card.actionText, { color: c.text }]}>Edit</Text>
+          <Ionicons name="pencil-outline" size={15} color={c.textPrimary} />
+          <Text style={[card.actionText, { color: c.textPrimary }]}>Edit</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -309,13 +309,13 @@ export const StoresScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: c.background }]}>
+    <View style={[styles.container, { backgroundColor: c.pageBg }]}>
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + spacing[8] }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Summary bar ── */}
-        <View style={[styles.summary, { backgroundColor: c.card, borderColor: c.border }]}>
+        <View style={[styles.summary, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}>
           <View style={styles.summaryLeft}>
             <Text style={[styles.summaryCount, { color: colors.primary }]}>{stores.length}</Text>
             <Text style={[styles.summaryLabel, { color: c.textSecondary }]}>
@@ -324,7 +324,7 @@ export const StoresScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </View>
           <View style={[styles.summaryDivider, { backgroundColor: c.border }]} />
           <View style={styles.summaryMiddle}>
-            <Text style={[styles.summaryActive, { color: c.text }]} numberOfLines={1}>
+            <Text style={[styles.summaryActive, { color: c.textPrimary }]} numberOfLines={1}>
               {activeStore?.name ?? '—'}
             </Text>
             <Text style={[styles.summaryActiveLabel, { color: c.textSecondary }]}>Active store</Text>
@@ -345,7 +345,7 @@ export const StoresScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View style={[styles.emptyIcon, { backgroundColor: colors.primary + '12' }]}>
               <Ionicons name="storefront-outline" size={36} color={colors.primary} />
             </View>
-            <Text style={[styles.emptyTitle, { color: c.text }]}>No stores yet</Text>
+            <Text style={[styles.emptyTitle, { color: c.textPrimary }]}>No stores yet</Text>
             <Text style={[styles.emptyDesc, { color: c.textSecondary }]}>
               Create your first store to start selling
             </Text>

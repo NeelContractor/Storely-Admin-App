@@ -11,12 +11,10 @@ import { Ionicons }          from '@expo/vector-icons';
 
 import { InputField }   from '../../components/ui/InputField';
 import { Button }        from '../../components/ui/Button';
-import { g }             from '../../theme/globalStyles';        
 import { colors }        from '../../theme/colors';
 import { spacing }       from '../../theme/typography';
 import { useTheme }      from '../../theme/ThemeContext';
 import { useAuthStore }  from '../../store/useAuthStore';
-import { Link } from '@react-navigation/native';
 
 export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -24,7 +22,7 @@ export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [password, setPassword]           = useState('');
   const [usernameError, setUsernameError] = useState('');
   const { signIn, isLoading, error }      = useAuthStore();
-  const { colors: themeColors, isDark, toggleTheme } = useTheme();
+  const { colors: themeColors, styles: g, isDark, toggleTheme } = useTheme();
 
   const handleSignIn = async () => {
     if (!username.trim()) {
@@ -44,7 +42,7 @@ export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={[g.screen, { backgroundColor: themeColors.background }]}
+      style={[g.screen, { backgroundColor: themeColors.pageBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
@@ -73,12 +71,12 @@ export const SignInScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       </LinearGradient>
 
       <ScrollView
-        style={[g.authFormContainer, { backgroundColor: themeColors.background }]}
+        style={[g.authFormContainer, { backgroundColor: themeColors.pageBg }]}
         contentContainerStyle={g.authFormContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={[g.h2, { color: themeColors.text }]}>Welcome back</Text>
+        <Text style={[g.h2, { color: themeColors.textPrimary }]}>Welcome back</Text>
         <Text style={[g.body, g.mb6, { color: themeColors.textSecondary }]}>
           Sign in to your admin account
         </Text>

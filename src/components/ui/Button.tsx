@@ -20,7 +20,7 @@ interface ButtonProps {
 
 const variantStyles: Record<ButtonVariant, { bg: string; text: string; border?: string }> = {
   primary: { bg: colors.primary, text: colors.white },
-  secondary: { bg: colors.bgLight, text: colors.textPrimary },
+  secondary: { bg: colors.surfaceSecondary, text: colors.textPrimary },
   outline: { bg: 'transparent', text: colors.primary, border: colors.primary },
   ghost: { bg: 'transparent', text: colors.textSecondary },
   danger: { bg: colors.danger, text: colors.white },

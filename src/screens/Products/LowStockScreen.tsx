@@ -49,9 +49,9 @@ const StoreSwitcher: React.FC<{
 
   if (stores.length <= 1) {
     return (
-      <View style={[sw.pill, { backgroundColor: c.card, borderColor: c.border }]}>
+      <View style={[sw.pill, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}>
         <Ionicons name="storefront-outline" size={14} color={colors.primary} />
-        <Text style={[sw.pillText, { color: c.text }]} numberOfLines={1}>
+        <Text style={[sw.pillText, { color: c.textPrimary }]} numberOfLines={1}>
           {activeStore?.name ?? 'No store'}
         </Text>
       </View>
@@ -61,12 +61,12 @@ const StoreSwitcher: React.FC<{
   return (
     <>
       <TouchableOpacity
-        style={[sw.pill, { backgroundColor: c.card, borderColor: c.border }]}
+        style={[sw.pill, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}
         onPress={() => setOpen(true)}
         activeOpacity={0.7}
       >
         <Ionicons name="storefront-outline" size={14} color={colors.primary} />
-        <Text style={[sw.pillText, { color: c.text }]} numberOfLines={1}>
+        <Text style={[sw.pillText, { color: c.textPrimary }]} numberOfLines={1}>
           {activeStore?.name ?? 'Select store'}
         </Text>
         <Ionicons name="chevron-down" size={13} color={c.textSecondary} />
@@ -74,7 +74,7 @@ const StoreSwitcher: React.FC<{
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <TouchableOpacity style={sw.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
-          <View style={[sw.dropdown, { backgroundColor: c.card, borderColor: c.border }]}>
+          <View style={[sw.dropdown, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}>
             <Text style={[sw.dropTitle, { color: c.textSecondary }]}>Switch Store</Text>
             <ScrollView bounces={false}>
               {stores.map(store => {
@@ -94,7 +94,7 @@ const StoreSwitcher: React.FC<{
                           </Text>}
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[sw.storeName, { color: c.text }]}>{store.name}</Text>
+                      <Text style={[sw.storeName, { color: c.textPrimary }]}>{store.name}</Text>
                       <Text style={[sw.storeUser, { color: c.textSecondary }]}>@{store.username}</Text>
                     </View>
                     {isActive && <Ionicons name="checkmark-circle" size={17} color={colors.primary} />}
@@ -191,17 +191,17 @@ const RestockModal: React.FC<{
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={rm.overlay}>
-        <View style={[rm.sheet, { backgroundColor: c.background, paddingBottom: insets.bottom + spacing[4] }]}>
+        <View style={[rm.sheet, { backgroundColor: c.pageBg, paddingBottom: insets.bottom + spacing[4] }]}>
           <View style={[rm.handle, { backgroundColor: c.border }]} />
 
           <View style={rm.productRow}>
-            <View style={[rm.thumb, { backgroundColor: c.card }]}>
+            <View style={[rm.thumb, { backgroundColor: c.cardBg }]}>
               {product.imageUrl
                 ? <Image source={{ uri: product.imageUrl }} style={rm.thumbImg} resizeMode="cover" />
                 : <Ionicons name="cube-outline" size={22} color={c.textSecondary} />}
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[rm.productName, { color: c.text }]} numberOfLines={1}>{product.name}</Text>
+              <Text style={[rm.productName, { color: c.textPrimary }]} numberOfLines={1}>{product.name}</Text>
               <Text style={[rm.productMeta, { color: c.textSecondary }]}>Current stock: {currentStock} units</Text>
             </View>
           </View>
@@ -211,13 +211,13 @@ const RestockModal: React.FC<{
           <Text style={[rm.label, { color: c.textSecondary }]}>Units to Add</Text>
           <View style={rm.inputRow}>
             <TouchableOpacity
-              style={[rm.stepper, { backgroundColor: c.card, borderColor: c.border }]}
+              style={[rm.stepper, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}
               onPress={() => setQty(v => String(Math.max(0, (parseInt(v, 10) || 0) - 1)))}
             >
-              <Ionicons name="remove" size={18} color={c.text} />
+              <Ionicons name="remove" size={18} color={c.textPrimary} />
             </TouchableOpacity>
             <TextInput
-              style={[rm.input, { backgroundColor: c.card, borderColor: c.border, color: c.text }]}
+              style={[rm.input, { backgroundColor: c.inputBg, borderColor: c.inputBorder, color: c.inputText }]}
               value={qty}
               onChangeText={setQty}
               keyboardType="number-pad"
@@ -226,10 +226,10 @@ const RestockModal: React.FC<{
               textAlign="center"
             />
             <TouchableOpacity
-              style={[rm.stepper, { backgroundColor: c.card, borderColor: c.border }]}
+              style={[rm.stepper, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}
               onPress={() => setQty(v => String((parseInt(v, 10) || 0) + 1))}
             >
-              <Ionicons name="add" size={18} color={c.text} />
+              <Ionicons name="add" size={18} color={c.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -245,17 +245,17 @@ const RestockModal: React.FC<{
             {[10, 25, 50, 100].map(n => (
               <TouchableOpacity
                 key={n}
-                style={[rm.preset, { backgroundColor: c.card, borderColor: c.border }]}
+                style={[rm.preset, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}
                 onPress={() => setQty(String(n))}
               >
-                <Text style={[rm.presetText, { color: c.text }]}>+{n}</Text>
+                <Text style={[rm.presetText, { color: c.textPrimary }]}>+{n}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           <View style={rm.btns}>
             <TouchableOpacity style={[rm.cancelBtn, { borderColor: c.border }]} onPress={onClose}>
-              <Text style={[rm.cancelText, { color: c.text }]}>Cancel</Text>
+              <Text style={[rm.cancelText, { color: c.dangerText }]}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[rm.saveBtn, saving && { opacity: 0.6 }]}
@@ -313,9 +313,9 @@ const LowStockRow: React.FC<{
     : 0;
 
   return (
-    <View style={[row.card, { backgroundColor: c.card, borderColor: c.border, borderLeftColor: config.color }]}>
+    <View style={[row.card, { backgroundColor: c.cardBg, borderColor: c.cardBorder, borderLeftColor: config.color }]}>
       {/* Thumbnail */}
-      <View style={[row.thumb, { backgroundColor: c.background }]}>
+      <View style={[row.thumb, { backgroundColor: c.pageBg }]}>
         {product.imageUrl
           ? <Image source={{ uri: product.imageUrl }} style={row.thumbImg} resizeMode="cover" />
           : <Ionicons name="cube-outline" size={20} color={c.textSecondary} />}
@@ -323,7 +323,7 @@ const LowStockRow: React.FC<{
 
       {/* Info — flex: 1 + alignSelf stretch so it fills the row horizontally */}
       <View style={row.info}>
-        <Text style={[row.name, { color: c.text }]} numberOfLines={1}>{product.name}</Text>
+        <Text style={[row.name, { color: c.textPrimary }]} numberOfLines={1}>{product.name}</Text>
         <Text style={[row.slug, { color: c.textSecondary }]}>/{product.slug}</Text>
 
         <View style={[row.barTrack, { backgroundColor: c.border }]}>
@@ -485,7 +485,7 @@ export const LowStockScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
 
   if (!stores.length) {
     return (
-      <View style={[styles.centered, { backgroundColor: c.background }]}>
+      <View style={[styles.centered, { backgroundColor: c.pageBg }]}>
         <Ionicons name="storefront-outline" size={48} color={colors.textMuted} />
         <Text style={[styles.emptyTitle, { color: c.textSecondary, marginTop: spacing[3] }]}>No stores found</Text>
       </View>
@@ -493,22 +493,22 @@ export const LowStockScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
   }
 
   const TABS: { key: FilterTab; label: string; count: number; color: string }[] = [
-    { key: 'all',      label: 'All',      count: lowStockProducts.length, color: c.text },
+    { key: 'all',      label: 'All',      count: lowStockProducts.length, color: c.textPrimary },
     { key: 'critical', label: 'Critical', count: criticalCount,           color: colors.danger },
     { key: 'low',      label: 'Low',      count: lowCount,                color: '#D97706' },
     { key: 'out',      label: 'Out',      count: outCount,                color: '#6B7280' },
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: c.background }]}>
+    <View style={[styles.container, { backgroundColor: c.pageBg }]}>
 
       {/* ── Store switcher + search ── */}
       <View style={styles.topBar}>
         <StoreSwitcher stores={stores} activeStore={selectedStore} onSelect={handleStoreSelect} />
-        <View style={[styles.searchWrap, { backgroundColor: c.card, borderColor: c.border }]}>
+        <View style={[styles.searchWrap, { backgroundColor: c.cardBg, borderColor: c.cardBorder }]}>
           <Ionicons name="search-outline" size={15} color={c.textSecondary} />
           <TextInput
-            style={[styles.searchInput, { color: c.text }]}
+            style={[styles.searchInput, { color: c.textPrimary }]}
             value={search}
             onChangeText={setSearch}
             placeholder="Search…"
@@ -555,7 +555,7 @@ export const LowStockScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
                 styles.tab,
                 active
                   ? { backgroundColor: tab.color + '15', borderColor: tab.color + '50' }
-                  : { backgroundColor: c.card, borderColor: c.border },
+                  : { backgroundColor: c.cardBg, borderColor: c.cardBorder },
               ]}
               onPress={() => setActiveTab(tab.key)}
               activeOpacity={0.7}
@@ -613,7 +613,7 @@ export const LowStockScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
               <View style={[styles.emptyIconWrap, { backgroundColor: colors.success + '15' }]}>
                 <Ionicons name="checkmark-circle-outline" size={36} color={colors.success} />
               </View>
-              <Text style={[styles.emptyTitle, { color: c.text }]}>
+              <Text style={[styles.emptyTitle, { color: c.textPrimary }]}>
                 {search ? 'No matches' : 'All stocked up!'}
               </Text>
               <Text style={[styles.emptyDesc, { color: c.textSecondary }]}>

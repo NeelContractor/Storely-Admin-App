@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons }  from '@expo/vector-icons';
-import { g }         from '../theme/globalStyles';   
+// import { g }         from '../theme/globalStyles';   
 import { colors }    from '../theme/colors';
 import { useTheme }  from '../theme/ThemeContext';
 
@@ -30,7 +30,7 @@ interface TabBarIconProps {
 }
 
 const TabBarIcon: React.FC<TabBarIconProps> = ({ focused, name, focusedName, label }) => {
-  const { colors: themeColors } = useTheme();
+  const { colors: themeColors, styles: g, isDark, toggleTheme } = useTheme();
   return (
     <View style={g.tabItem}>
       <View style={[g.tabIconWrapper, focused && g.tabIconActive]}>
@@ -48,7 +48,7 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ focused, name, focusedName, lab
 };
 
 export const BottomTabNavigator: React.FC = () => {
-  const { colors: themeColors } = useTheme();
+  const { colors: themeColors, styles: g, isDark, toggleTheme } = useTheme();
 
   return (
     <Tab.Navigator
@@ -57,7 +57,7 @@ export const BottomTabNavigator: React.FC = () => {
         tabBarStyle: [
           g.tabBar,
           {
-            backgroundColor: themeColors.card,
+            backgroundColor: themeColors.cardBg,
             borderTopColor:  themeColors.border,
           },
         ],

@@ -33,7 +33,7 @@ export const MoreStack: React.FC = () => {
             />
           );
         },
-        cardStyle: { backgroundColor: themeColors.background },
+        cardStyle: { backgroundColor: themeColors.cardBg },
       })}
     >
       <Stack.Screen name="More" component={MoreScreen} />

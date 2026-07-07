@@ -1,56 +1,41 @@
 // src/theme/ThemeContext.tsx
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useMemo, useState, useCallback, ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
-import { colors } from './colors';
+import { getColors, ThemeColors } from './colors';
+import { createGlobalStyles, GlobalStyles } from './globalStyles';
 
-type Theme = 'light' | 'dark';
+type ThemeContextValue = {
+  isDark: boolean;
+  colors: ThemeColors;
+  styles: GlobalStyles;
+  toggleTheme: () => void;
+  setIsDark: (value: boolean) => void;
+};
 
-interface ThemeContextType {
-    theme: Theme;
-    isDark: boolean;
-    toggleTheme: () => void;
-    colors: {
-        background: string;
-        card: string;
-        text: string;
-        textSecondary: string;
-        border: string;
-        sidebar: string;
-        primary: string;
-    };
+const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const systemScheme = useColorScheme(); // 'light' | 'dark' | null
+  const [override, setOverride] = useState<boolean | null>(null);
+
+  const isDark = override ?? systemScheme === 'dark';
+
+  const colors = useMemo(() => getColors(isDark ? 'dark' : 'light'), [isDark]);
+  const styles = useMemo(() => createGlobalStyles(colors), [colors]);
+
+  const toggleTheme = useCallback(() => setOverride((prev) => !(prev ?? isDark)), [isDark]);
+  const setIsDark = useCallback((value: boolean) => setOverride(value), []);
+
+  const value = useMemo(
+    () => ({ isDark, colors, styles, toggleTheme, setIsDark }),
+    [isDark, colors, styles, toggleTheme, setIsDark]
+  );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-const ThemeContext = createContext<ThemeContextType>({} as ThemeContextType);
-
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const systemScheme = useColorScheme();
-    const [theme, setTheme] = useState<Theme>(systemScheme === 'dark' ? 'dark' : 'light');
-
-    const isDark = theme === 'dark';
-
-    const toggleTheme = useCallback(() => {
-        setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-    }, []);
-
-    const themeColors = {
-        background: isDark ? colors.bgDark : colors.bgLight,
-        card: isDark ? colors.bgCardDark : colors.bgCard,
-        text: isDark ? colors.textDark : colors.textPrimary,
-        textSecondary: isDark ? colors.textDarkSecondary : colors.textSecondary,
-        border: isDark ? colors.borderDark : colors.border,
-        sidebar: colors.sidebar,
-        primary: colors.primary,
-    };
-
-    return (
-        <ThemeContext.Provider value={{ theme, isDark, toggleTheme, colors: themeColors }}>
-        {children}
-        </ThemeContext.Provider>
-    );
-};
-
-export const useTheme = () => {
-    const ctx = useContext(ThemeContext);
-    if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
-    return ctx;
-};
+export function useTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used inside <ThemeProvider>');
+  return ctx;
+}

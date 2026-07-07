@@ -99,7 +99,7 @@ const ImageUploadButton: React.FC<{
   }
   return (
     <TouchableOpacity
-      style={[img.placeholder, { borderColor: c.border, backgroundColor: c.card }]}
+      style={[img.placeholder, { borderColor: c.border, backgroundColor: c.cardBg }]}
       onPress={pick} disabled={uploading} activeOpacity={0.75}
     >
       {uploading
@@ -193,21 +193,21 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   };
   const parentOptions = buildOptions(0, initial?.id, 0);
 
-  const inputStyle = [mst.input, { backgroundColor: c.background, borderColor: c.border, color: c.text }];
+  const inputStyle = [mst.input, { backgroundColor: c.inputBg, borderColor: c.border, color: c.inputText }];
   const parentName = form.parentId === 0
     ? 'Root (top-level)'
     : allCategories.find(cat => cat.id === form.parentId)?.name ?? 'Select…';
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={[mst.container, { backgroundColor: c.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={[mst.container, { backgroundColor: c.pageBg }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
 
         {/* ── Header ── */}
         <View style={[mst.header, { borderBottomColor: c.border }]}>
           <View style={mst.headerLeft}>
             <View style={[mst.headerDot, { backgroundColor: mode === 'create' ? colors.primary : '#8B5CF6' }]} />
             <View>
-              <Text style={[mst.headerTitle, { color: c.text }]}>
+              <Text style={[mst.headerTitle, { color: c.textPrimary }]}>
                 {mode === 'create' ? (form.parentId ? 'New Sub-category' : 'New Category') : 'Edit Category'}
               </Text>
               <Text style={[mst.headerSub, { color: c.textSecondary }]}>
@@ -219,8 +219,8 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               </Text>
             </View>
           </View>
-          <TouchableOpacity style={[mst.closeBtn, { backgroundColor: c.card }]} onPress={onClose}>
-            <Ionicons name="close" size={16} color={c.text} />
+          <TouchableOpacity style={[mst.closeBtn, { backgroundColor: c.cardBg }]} onPress={onClose}>
+            <Ionicons name="close" size={16} color={c.textPrimary} />
           </TouchableOpacity>
         </View>
 
@@ -240,7 +240,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           <View style={mst.field}>
             <Text style={[mst.label, { color: c.textSecondary }]}>Parent Category</Text>
             <TouchableOpacity
-              style={[mst.selector, { backgroundColor: c.card, borderColor: c.border }]}
+              style={[mst.selector, { backgroundColor: c.cardBg, borderColor: c.border }]}
               onPress={() => Alert.alert('Select Parent', undefined, [
                 { text: 'Root (top-level)', onPress: () => set('parentId', 0) },
                 ...parentOptions.map(opt => ({ text: opt.label, onPress: () => set('parentId', opt.id) })),
@@ -248,7 +248,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               ])}
             >
               <View style={[mst.selectorDot, { backgroundColor: form.parentId === 0 ? colors.primary + '60' : '#8B5CF6' + '60' }]} />
-              <Text style={[mst.selectorText, { color: c.text }]}>{parentName}</Text>
+              <Text style={[mst.selectorText, { color: c.textPrimary }]}>{parentName}</Text>
               <Ionicons name="chevron-expand" size={14} color={c.textSecondary} />
             </TouchableOpacity>
           </View>
@@ -269,7 +269,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           <View style={mst.field}>
             <View style={mst.labelRow}>
               <Text style={[mst.label, { color: c.textSecondary }]}>Slug</Text>
-              <Text style={[mst.chip, { backgroundColor: c.card, color: c.textSecondary }]}>auto-generated</Text>
+              <Text style={[mst.chip, { backgroundColor: c.cardBg, color: c.textSecondary }]}>auto-generated</Text>
             </View>
             <TextInput
               style={[inputStyle, mst.mono]} value={form.slug}
@@ -283,7 +283,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           <View style={mst.field}>
             <View style={mst.labelRow}>
               <Text style={[mst.label, { color: c.textSecondary }]}>Description</Text>
-              <Text style={[mst.chip, { backgroundColor: c.card, color: c.textSecondary }]}>optional</Text>
+              <Text style={[mst.chip, { backgroundColor: c.cardBg, color: c.textSecondary }]}>optional</Text>
             </View>
             <TextInput
               style={[inputStyle, mst.textarea]} value={form.description}
@@ -297,7 +297,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           <View style={mst.field}>
             <View style={mst.labelRow}>
               <Text style={[mst.label, { color: c.textSecondary }]}>Image</Text>
-              <Text style={[mst.chip, { backgroundColor: c.card, color: c.textSecondary }]}>optional</Text>
+              <Text style={[mst.chip, { backgroundColor: c.cardBg, color: c.textSecondary }]}>optional</Text>
             </View>
             <View style={mst.imageRow}>
               <ImageUploadButton
@@ -320,14 +320,14 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               {[
                 { label: 'High',   value: 0, color: '#D97706', bg: '#FEF3C7' },
                 { label: 'Medium', value: 1, color: colors.primary, bg: colors.primary + '15' },
-                { label: 'Low',    value: 2, color: c.textSecondary, bg: c.card },
+                { label: 'Low',    value: 2, color: c.textSecondary, bg: c.cardBg },
               ].map(opt => {
                 const active = form.displayOrder === opt.value;
                 return (
                   <TouchableOpacity
                     key={opt.value}
                     style={[mst.orderBtn, {
-                      backgroundColor: active ? opt.bg : c.background,
+                      backgroundColor: active ? opt.bg : c.pageBg,
                       borderColor: active ? opt.color + '50' : c.border,
                     }]}
                     onPress={() => set('displayOrder', opt.value)}
@@ -346,7 +346,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
         {/* ── Footer ── */}
         <View style={[mst.footer, { borderTopColor: c.border, paddingBottom: insets.bottom + spacing[3] }]}>
           <TouchableOpacity style={[mst.cancelBtn, { borderColor: c.border }]} onPress={onClose}>
-            <Text style={[mst.cancelText, { color: c.text }]}>Cancel</Text>
+            <Text style={[mst.cancelText, { color: c.textPrimary }]}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[mst.saveBtn, saving && { opacity: 0.6 }]} onPress={handleSave} disabled={saving}>
             {saving
@@ -440,15 +440,15 @@ const ToggleConfirmModal: React.FC<{
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={tc.overlay}>
-        <View style={[tc.sheet, { backgroundColor: c.background, paddingBottom: insets.bottom + spacing[4] }]}>
+        <View style={[tc.sheet, { backgroundColor: c.pageBg, paddingBottom: insets.bottom + spacing[4] }]}>
           <View style={[tc.handle, { backgroundColor: c.border }]} />
           <View style={[tc.iconWrap, { backgroundColor: accent + '15' }]}>
             <Ionicons name={isActivate ? 'checkmark-circle' : 'pause-circle'} size={32} color={accent} />
           </View>
-          <Text style={[tc.title, { color: c.text }]}>{isActivate ? 'Activate' : 'Deactivate'}?</Text>
-          <Text style={[tc.name, { color: c.text }]}>"{category?.name}"</Text>
+          <Text style={[tc.title, { color: c.textPrimary }]}>{isActivate ? 'Activate' : 'Deactivate'}?</Text>
+          <Text style={[tc.name, { color: c.textPrimary }]}>"{category?.name}"</Text>
           {!isActivate && (
-            <View style={[tc.info, { backgroundColor: c.card }]}>
+            <View style={[tc.info, { backgroundColor: c.cardBg }]}>
               <Text style={[tc.infoText, { color: c.textSecondary }]}>
                 Products remain visible but won't appear in category filters.
               </Text>
@@ -456,7 +456,7 @@ const ToggleConfirmModal: React.FC<{
           )}
           <View style={tc.btns}>
             <TouchableOpacity style={[tc.cancelBtn, { borderColor: c.border }]} onPress={onClose}>
-              <Text style={[tc.cancelText, { color: c.text }]}>Cancel</Text>
+              <Text style={[tc.cancelText, { color: c.textPrimary }]}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[tc.confirmBtn, { backgroundColor: accent, opacity: loading ? 0.6 : 1 }]}
@@ -510,7 +510,7 @@ const CategoryCard: React.FC<{
     <View style={[
       cr.card,
       {
-        backgroundColor: c.card,
+        backgroundColor: c.cardBg,
         borderColor: c.border,
         marginLeft: depth * 14,
         borderLeftColor: accentColor,
@@ -529,7 +529,7 @@ const CategoryCard: React.FC<{
 
         {/* Info */}
         <View style={cr.info}>
-          <Text style={[cr.name, { color: c.text }]} numberOfLines={1}>{cat.name}</Text>
+          <Text style={[cr.name, { color: c.textPrimary }]} numberOfLines={1}>{cat.name}</Text>
           <Text style={[cr.slug, { color: c.textSecondary }]} numberOfLines={1}>/{cat.slug}</Text>
           {cat.description ? (
             <Text style={[cr.desc, { color: c.textSecondary }]} numberOfLines={1}>{cat.description}</Text>
@@ -540,7 +540,7 @@ const CategoryCard: React.FC<{
         <View style={cr.right}>
           {/* Status pill */}
           <View style={[cr.statusPill, {
-            backgroundColor: isActive ? '#10B981' + '18' : c.background,
+            backgroundColor: isActive ? '#10B981' + '18' : c.statusActiveBg,
           }]}>
             <View style={[cr.statusDot, { backgroundColor: isActive ? '#10B981' : c.textSecondary }]} />
             <Text style={[cr.statusText, { color: isActive ? '#065F46' : c.textSecondary }]}>
@@ -549,7 +549,7 @@ const CategoryCard: React.FC<{
           </View>
           {/* Expand */}
           {hasChildren && (
-            <TouchableOpacity style={[cr.expandBtn, { backgroundColor: c.background }]} onPress={onToggleExpand}>
+            <TouchableOpacity style={[cr.expandBtn, { backgroundColor: c.pageBg }]} onPress={onToggleExpand}>
               <Ionicons
                 name={isExpanded ? 'chevron-down' : 'chevron-forward'}
                 size={13} color={c.textSecondary}
@@ -718,7 +718,7 @@ export const CategoriesScreen: React.FC<{ navigation: any }> = () => {
   const subCount    = categories.length - rootCount;
 
   return (
-    <View style={[s.container, { backgroundColor: c.background }]}>
+    <View style={[s.container, { backgroundColor: c.pageBg }]}>
       <ScrollView
         contentContainerStyle={[s.scroll, { paddingBottom: insets.bottom + spacing[10] }]}
         showsVerticalScrollIndicator={false}
@@ -733,11 +733,11 @@ export const CategoriesScreen: React.FC<{ navigation: any }> = () => {
             { label: 'Children', value: subCount,          icon: 'git-branch-outline',  accent: '#0891B2' },
             { label: 'Active',   value: activeCount,       icon: 'checkmark-circle-outline', accent: '#10B981' },
           ].map(stat => (
-            <View key={stat.label} style={[s.statCard, { backgroundColor: c.card, borderColor: c.border }]}>
+            <View key={stat.label} style={[s.statCard, { backgroundColor: c.cardBg, borderColor: c.border }]}>
               <Ionicons name={stat.icon as any} size={16} color={stat.accent} />
               {loading
                 ? <View style={[s.statSkel, { backgroundColor: c.border }]} />
-                : <Text style={[s.statVal, { color: c.text }]}>{stat.value}</Text>}
+                : <Text style={[s.statVal, { color: c.textPrimary }]}>{stat.value}</Text>}
               <Text style={[s.statLabel, { color: c.textSecondary }]}>{stat.label}</Text>
             </View>
           ))}
@@ -745,10 +745,10 @@ export const CategoriesScreen: React.FC<{ navigation: any }> = () => {
 
         {/* ── Search + Add ── */}
         <View style={s.searchRow}>
-          <View style={[s.searchWrap, { backgroundColor: c.card, borderColor: c.border }]}>
+          <View style={[s.searchWrap, { backgroundColor: c.cardBg, borderColor: c.border }]}>
             <Ionicons name="search-outline" size={15} color={c.textSecondary} />
             <TextInput
-              style={[s.searchInput, { color: c.text }]}
+              style={[s.searchInput, { color: c.textPrimary }]}
               value={search} onChangeText={setSearch}
               placeholder="Search categories…" placeholderTextColor={colors.textMuted}
             />
@@ -782,7 +782,7 @@ export const CategoriesScreen: React.FC<{ navigation: any }> = () => {
         {loading && categories.length === 0 && (
           <View style={{ gap: spacing[2], paddingHorizontal: spacing[4] }}>
             {[...Array(4)].map((_, i) => (
-              <View key={i} style={[s.skelCard, { backgroundColor: c.card, borderColor: c.border }]}>
+              <View key={i} style={[s.skelCard, { backgroundColor: c.cardBg, borderColor: c.border }]}>
                 <View style={[s.skelAvatar, { backgroundColor: c.border }]} />
                 <View style={{ flex: 1, gap: 6 }}>
                   <View style={[s.skelLine, { width: '55%', backgroundColor: c.border }]} />
@@ -799,7 +799,7 @@ export const CategoriesScreen: React.FC<{ navigation: any }> = () => {
             <View style={[s.emptyIconWrap, { backgroundColor: colors.primary + '12' }]}>
               <Ionicons name="folder-open-outline" size={36} color={colors.primary} />
             </View>
-            <Text style={[s.emptyTitle, { color: c.text }]}>No categories yet</Text>
+            <Text style={[s.emptyTitle, { color: c.textPrimary }]}>No categories yet</Text>
             <Text style={[s.emptyDesc, { color: c.textSecondary }]}>
               Create your first category to organise your products
             </Text>
@@ -815,10 +815,10 @@ export const CategoriesScreen: React.FC<{ navigation: any }> = () => {
 
         {!loading && q && displayItems.length === 0 && (
           <View style={s.empty}>
-            <View style={[s.emptyIconWrap, { backgroundColor: c.card }]}>
+            <View style={[s.emptyIconWrap, { backgroundColor: c.cardBg }]}>
               <Ionicons name="search-outline" size={32} color={c.textSecondary} />
             </View>
-            <Text style={[s.emptyTitle, { color: c.text }]}>No matches</Text>
+            <Text style={[s.emptyTitle, { color: c.textPrimary }]}>No matches</Text>
             <Text style={[s.emptyDesc, { color: c.textSecondary }]}>Try a different search term</Text>
           </View>
         )}

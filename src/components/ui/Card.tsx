@@ -13,7 +13,7 @@ interface CardProps {
 export const Card: React.FC<CardProps> = ({ children, style, padding = spacing[5] }) => {
   const { colors } = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, padding }, style]}>
+    <View style={[styles.card, { backgroundColor: colors.cardBg, padding }, style]}>
       {children}
     </View>
   );

@@ -48,9 +48,9 @@ const StoreSwitcher: React.FC<StoreSwitcherProps> = ({ stores, activeStore, onSe
 
   if (stores.length <= 1) {
     return (
-      <View style={[styles.storePill, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+      <View style={[styles.storePill, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
         <Ionicons name="storefront-outline" size={15} color={colors.primary} />
-        <Text style={[styles.storePillText, { color: themeColors.text }]} numberOfLines={1}>
+        <Text style={[styles.storePillText, { color: themeColors.textPrimary }]} numberOfLines={1}>
           {activeStore?.name ?? 'No store'}
         </Text>
       </View>
@@ -60,12 +60,12 @@ const StoreSwitcher: React.FC<StoreSwitcherProps> = ({ stores, activeStore, onSe
   return (
     <>
       <TouchableOpacity
-        style={[styles.storePill, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
+        style={[styles.storePill, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}
         onPress={() => setOpen(true)}
         activeOpacity={0.7}
       >
         <Ionicons name="storefront-outline" size={15} color={colors.primary} />
-        <Text style={[styles.storePillText, { color: themeColors.text }]} numberOfLines={1}>
+        <Text style={[styles.storePillText, { color: themeColors.textPrimary }]} numberOfLines={1}>
           {activeStore?.name ?? 'Select store'}
         </Text>
         <Ionicons name="chevron-down" size={14} color={themeColors.textSecondary} />
@@ -73,7 +73,7 @@ const StoreSwitcher: React.FC<StoreSwitcherProps> = ({ stores, activeStore, onSe
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
-          <View style={[styles.dropdown, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+          <View style={[styles.dropdown, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
             <Text style={[styles.dropdownTitle, { color: themeColors.textSecondary }]}>Switch Store</Text>
             <ScrollView bounces={false}>
               {stores.map((store) => {
@@ -96,7 +96,7 @@ const StoreSwitcher: React.FC<StoreSwitcherProps> = ({ stores, activeStore, onSe
                         )}
                       </View>
                       <View>
-                        <Text style={[styles.dropdownStoreName, { color: themeColors.text }]}>{store.name}</Text>
+                        <Text style={[styles.dropdownStoreName, { color: themeColors.textPrimary }]}>{store.name}</Text>
                         <Text style={[styles.dropdownStoreUsername, { color: themeColors.textSecondary }]}>@{store.username}</Text>
                       </View>
                     </View>
@@ -178,7 +178,7 @@ const ProductActionsMenu: React.FC<ProductActionsMenuProps> = ({
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
-          <View style={[styles.actionsSheet, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+          <View style={[styles.actionsSheet, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
             {/* Product header */}
             <View style={styles.actionsHeader}>
               <View style={styles.actionsProductThumb}>
@@ -189,7 +189,7 @@ const ProductActionsMenu: React.FC<ProductActionsMenuProps> = ({
                 )}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.actionsProductName, { color: themeColors.text }]} numberOfLines={1}>
+                <Text style={[styles.actionsProductName, { color: themeColors.textPrimary }]} numberOfLines={1}>
                   {product.name}
                 </Text>
                 <Text style={[styles.actionsProductSlug, { color: themeColors.textSecondary }]}>
@@ -206,7 +206,7 @@ const ProductActionsMenu: React.FC<ProductActionsMenuProps> = ({
                 <Ionicons name="pencil-outline" size={18} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.actionLabel, { color: themeColors.text }]}>Edit Product</Text>
+                <Text style={[styles.actionLabel, { color: themeColors.textPrimary }]}>Edit Product</Text>
                 <Text style={[styles.actionSub, { color: themeColors.textSecondary }]}>
                   Update details, price, images
                 </Text>
@@ -303,7 +303,7 @@ const GridActionsMenu: React.FC<GridActionsMenuProps> = (props) => {
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
-          <View style={[styles.actionsSheet, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+          <View style={[styles.actionsSheet, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
             <View style={styles.actionsHeader}>
               <View style={styles.actionsProductThumb}>
                 {props.product.imageUrl ? (
@@ -313,7 +313,7 @@ const GridActionsMenu: React.FC<GridActionsMenuProps> = (props) => {
                 )}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.actionsProductName, { color: themeColors.text }]} numberOfLines={1}>
+                <Text style={[styles.actionsProductName, { color: themeColors.textPrimary }]} numberOfLines={1}>
                   {props.product.name}
                 </Text>
                 <Text style={[styles.actionsProductSlug, { color: themeColors.textSecondary }]}>
@@ -329,7 +329,7 @@ const GridActionsMenu: React.FC<GridActionsMenuProps> = (props) => {
                 <Ionicons name="pencil-outline" size={18} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.actionLabel, { color: themeColors.text }]}>Edit Product</Text>
+                <Text style={[styles.actionLabel, { color: themeColors.textPrimary }]}>Edit Product</Text>
                 <Text style={[styles.actionSub, { color: themeColors.textSecondary }]}>Update details, price, images</Text>
               </View>
               <Ionicons name="chevron-forward" size={16} color={themeColors.textSecondary} />
@@ -579,7 +579,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout, storeUsernam
     return (
       <TouchableOpacity
         activeOpacity={0.93}
-        style={[styles.gridCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
+        style={[styles.gridCard, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}
       >
         <View style={[styles.gridImageWrap, { height: GRID_IMG_H }]}>
           <ProductImageCarousel imageUrl={product.imageUrl} images={product.images} width={GRID_IMG_W} height={GRID_IMG_H} />
@@ -604,12 +604,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout, storeUsernam
 
         <View style={styles.gridInfo}>
           <View style={styles.gridNameRow}>
-            <Text style={[styles.gridName, { color: themeColors.text }]} numberOfLines={2}>{product.name}</Text>
+            <Text style={[styles.gridName, { color: themeColors.textPrimary }]} numberOfLines={2}>{product.name}</Text>
             <View style={[styles.gridStockDot, { backgroundColor: STATUS_DOT_COLOR[status] }]} />
           </View>
           <Text style={[styles.gridSlug, { color: themeColors.textSecondary }]} numberOfLines={1}>/{product.slug}</Text>
           <View style={styles.gridPriceRow}>
-            <Text style={[styles.gridPrice, { color: themeColors.text }]}>₹{product.price.toLocaleString()}</Text>
+            <Text style={[styles.gridPrice, { color: themeColors.textPrimary }]}>₹{product.price.toLocaleString()}</Text>
             {product.compareAtPrice > 0 && product.compareAtPrice > product.price && (
               <Text style={[styles.gridComparePrice, { color: themeColors.textSecondary }]}>
                 ₹{product.compareAtPrice.toLocaleString()}
@@ -628,10 +628,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, layout, storeUsernam
   // ── List card ─────────────────────────────────────────────────────────────
   return (
     <TouchableOpacity activeOpacity={0.75}>
-      <View style={[styles.card, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+      <View style={[styles.card, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
         <ProductImageCarousel imageUrl={product.imageUrl} images={product.images} width={64} height={64} />
         <View style={styles.productInfo}>
-          <Text style={[styles.productName, { color: themeColors.text }]} numberOfLines={2}>{product.name}</Text>
+          <Text style={[styles.productName, { color: themeColors.textPrimary }]} numberOfLines={2}>{product.name}</Text>
           <Text style={[styles.slug, { color: themeColors.textSecondary }]}>/{product.slug}</Text>
           <View style={styles.productMeta}>
             <Text style={[styles.price, { color: colors.primary }]}>₹{product.price.toLocaleString()}</Text>
@@ -743,7 +743,7 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
 
   if (!stores.length) {
     return (
-      <View style={[styles.centered, { backgroundColor: themeColors.background }]}>
+      <View style={[styles.centered, { backgroundColor: themeColors.pageBg }]}>
         <Ionicons name="storefront-outline" size={48} color={colors.textMuted} />
         <Text style={[styles.emptyText, { color: themeColors.textSecondary }]}>No store found</Text>
       </View>
@@ -751,14 +751,14 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <View style={[styles.container, { backgroundColor: themeColors.pageBg }]}>
 
       {/* ── Search + Add ── */}
       <View style={styles.topRow}>
-        <View style={[styles.searchBar, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.searchBar, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
           <Ionicons name="search-outline" size={18} color={colors.textMuted} />
           <TextInput
-            style={[styles.searchInput, { color: themeColors.text }]}
+            style={[styles.searchInput, { color: themeColors.inputText }]}
             placeholder="Search products..."
             placeholderTextColor={colors.textMuted}
             value={search}
@@ -778,7 +778,7 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
       {/* ── Store Switcher + Layout Toggle ── */}
       <View style={styles.secondRow}>
         <StoreSwitcher stores={stores} activeStore={selectedStore} onSelect={handleStoreSelect} />
-        <View style={[styles.layoutToggleWrap, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+        <View style={[styles.layoutToggleWrap, { backgroundColor: themeColors.cardBg, borderColor: themeColors.cardBorder }]}>
           {(['list', 'grid'] as const).map((mode) => {
             const active = layout === mode;
             return (
@@ -808,7 +808,7 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
           { label: 'Out',       value: products.filter(p => getStatus(p) === 'out').length },
         ].map(s => (
           <View key={s.label} style={styles.statCard}>
-            <Text style={[styles.statValue, { color: themeColors.text }]}>{isLoading ? '—' : s.value}</Text>
+            <Text style={[styles.statValue, { color: themeColors.textPrimary }]}>{isLoading ? '—' : s.value}</Text>
             <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>{s.label}</Text>
           </View>
         ))}
@@ -860,7 +860,7 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
                   onPress={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                 >
-                  <Ionicons name="chevron-back" size={18} color={currentPage === 1 ? colors.textMuted : themeColors.text} />
+                  <Ionicons name="chevron-back" size={18} color={currentPage === 1 ? colors.textMuted : themeColors.textPrimary} />
                 </TouchableOpacity>
                 <Text style={[styles.pageInfo, { color: themeColors.textSecondary }]}>{currentPage} / {totalPages}</Text>
                 <TouchableOpacity
@@ -868,7 +868,7 @@ export const AllProductsScreen: React.FC<{ navigation: any }> = ({ navigation })
                   onPress={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={!hasMore}
                 >
-                  <Ionicons name="chevron-forward" size={18} color={!hasMore ? colors.textMuted : themeColors.text} />
+                  <Ionicons name="chevron-forward" size={18} color={!hasMore ? colors.textMuted : themeColors.textPrimary} />
                 </TouchableOpacity>
               </View>
             ) : null

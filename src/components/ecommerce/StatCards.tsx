@@ -26,7 +26,7 @@ const StatCardItem: React.FC<StatCardData> = ({
   const isPositive = change >= 0;
 
   return (
-    <View style={[styles.card, { backgroundColor: themeColors.card }]}>
+    <View style={[styles.card, { backgroundColor: themeColors.cardBg }]}>
       <View style={styles.cardTop}>
         <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
           <Ionicons name={icon} size={22} color={iconColor} />
@@ -42,7 +42,7 @@ const StatCardItem: React.FC<StatCardData> = ({
           </Text>
         </View>
       </View>
-      <Text style={[styles.value, { color: themeColors.text }]}>{value}</Text>
+      <Text style={[styles.value, { color: themeColors.textPrimary }]}>{value}</Text>
       <Text style={[styles.title, { color: themeColors.textSecondary }]}>{title}</Text>
     </View>
   );

@@ -7,22 +7,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '../../components/ui/Avatar';
 import { Badge } from '../../components/ui/Badge';
-import { Customer } from '../../types';
+import { MockCustomer } from '../../utils/mockData';
 import { colors } from '../../theme/colors';
 import { typography, spacing, radii } from '../../theme/typography';
 import { useTheme } from '../../theme/ThemeContext';
 import { mockCustomers } from '../../utils/mockData';
 
-const CustomerRow: React.FC<{ customer: Customer }> = ({ customer }) => {
+const CustomerRow: React.FC<{ customer: MockCustomer }> = ({ customer }) => {
   const { colors: themeColors } = useTheme();
 
   return (
     <TouchableOpacity activeOpacity={0.7}>
-      <View style={[styles.row, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+      <View style={[styles.row, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
         <Avatar name={customer.name} size={44} />
         <View style={styles.info}>
           <View style={styles.nameRow}>
-            <Text style={[styles.name, { color: themeColors.text }]}>{customer.name}</Text>
+            <Text style={[styles.name, { color: themeColors.textPrimary }]}>{customer.name}</Text>
             <Badge
               label={customer.status === 'active' ? 'Active' : 'Inactive'}
               variant={customer.status === 'active' ? 'success' : 'default'}
@@ -32,7 +32,7 @@ const CustomerRow: React.FC<{ customer: Customer }> = ({ customer }) => {
           <Text style={[styles.email, { color: themeColors.textSecondary }]}>{customer.email}</Text>
           <View style={styles.stats}>
             <View style={styles.stat}>
-              <Text style={[styles.statValue, { color: themeColors.text }]}>
+              <Text style={[styles.statValue, { color: themeColors.textPrimary }]}>
                 {customer.totalOrders}
               </Text>
               <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}> orders</Text>
@@ -64,11 +64,11 @@ export const AllCustomersScreen: React.FC = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
-      <View style={[styles.searchBar, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+    <View style={[styles.container, { backgroundColor: themeColors.pageBg }]}>
+      <View style={[styles.searchBar, { backgroundColor: themeColors.cardBg, borderColor: themeColors.border }]}>
         <Ionicons name="search-outline" size={18} color={colors.textMuted} />
         <TextInput
-          style={[styles.searchInput, { color: themeColors.text }]}
+          style={[styles.searchInput, { color: themeColors.inputText }]}
           placeholder="Search customers..."
           placeholderTextColor={colors.textMuted}
           value={search}

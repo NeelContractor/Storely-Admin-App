@@ -13,7 +13,6 @@ import { RecentOrdersCard } from '../../components/ecommerce/RecentOrdersCard';
 import { LowStockAlerts }   from '../../components/ecommerce/LowStockAlerts';
 import { Card }             from '../../components/ui/Card';
 import { useTheme }         from '../../theme/ThemeContext';
-import { g }                from '../../theme/globalStyles';
 import { colors }           from '../../theme/colors';
 import { spacing }          from '../../theme/typography';
 import { useAppStore }      from '../../store/useAppStore';
@@ -72,7 +71,7 @@ const quickActions: {
 
 export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { isVerifying }         = useAuth();
-  const { colors: themeColors } = useTheme();
+  const { colors: themeColors, styles: g, isDark, toggleTheme } = useTheme();
   const insets                  = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -159,7 +158,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   return (
     <ScrollView
-      style={[g.screen, { backgroundColor: themeColors.background }]}
+      style={[g.screen, { backgroundColor: themeColors.pageBg }]}
       contentContainerStyle={[g.scrollContent, { paddingBottom: insets.bottom + spacing[6] }]}
       showsVerticalScrollIndicator={false}
       refreshControl={
@@ -179,7 +178,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       {/* Quick Actions */}
       <Card style={styles.quickActionsCard}>
-        <Text style={[g.sectionTitle, { color: themeColors.text }]}>Quick Actions</Text>
+        <Text style={[g.sectionTitle, { color: themeColors.textPrimary }]}>Quick Actions</Text>
         <View style={g.quickActionsGrid}>
           {quickActions.map((action) => (
             <TouchableOpacity
@@ -191,7 +190,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <View style={[g.quickActionIcon, { backgroundColor: action.color + '15' }]}>
                 <Ionicons name={action.icon} size={22} color={action.color} />
               </View>
-              <Text style={[g.quickActionLabel, { color: themeColors.text }]}>{action.label}</Text>
+              <Text style={[g.quickActionLabel, { color: themeColors.textPrimary }]}>{action.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -199,7 +198,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       {/* Stat Cards */}
       <View style={g.mb4}>
-        <Text style={[g.sectionTitle, { color: themeColors.text }]}>Overview</Text>
+        <Text style={[g.sectionTitle, { color: themeColors.textPrimary }]}>Overview</Text>
         <StatCards stats={dashboardStats} />
       </View>
 
