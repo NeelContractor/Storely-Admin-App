@@ -21,7 +21,7 @@ import type { ApiResponse, Store, CreateStoreBody, Product } from "../types/type
 
 // GET /v1/stores/{username}/products/{slug}
 export const getStoreProductBySlug = (username: string, slug: string) =>
-    api<Product>(ENDPOINTS.GET_STORE_PRODUCT_BY_SLUG(username, slug));
+    api<Product>(ENDPOINTS.GET_PRODUCT_BY_SLUG(username, slug));
 
 
 export const getStore = (username: string) =>

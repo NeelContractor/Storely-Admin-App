@@ -35,6 +35,12 @@ export const ENDPOINTS = {
     // Cloudinary Image 
     CLOUDINARY_SIGNATURE: () => `/api/v1/cloudinary/signature`,
 
-    GET_STORE_PRODUCTS: (username: string) => `/api/v1/rest/stores/${username}/products`,
-    GET_STORE_PRODUCT_BY_SLUG: (username: string, slug: string) => `/api/v1/rest/stores/${username}/products/${slug}`,
+    // GET_STORE_PRODUCTS: (username: string) => `/api/v1/rest/stores/${username}/products`,
+    // GET_STORE_PRODUCT_BY_SLUG: (username: string, slug: string) => `/api/v1/rest/stores/${username}/products/${slug}`,
+
+    // Order
+    GET_ORDERS: (username: string) => `/api/v1/rest/stores/${username}/orders`,
+    GET_ORDER: (username: string, orderId: string) => `/api/v1/rest/stores/${username}/orders/${orderId}`,
+    UPDATE_ORDER: (username: string, orderId: string) => `/api/v1/rest/stores/${username}/orders/${orderId}`,
+    DELETE_ORDER: (username: string, orderId: string) => `/api/v1/rest/stores/${username}/orders/${orderId}`,
 } as const;

@@ -15,18 +15,20 @@ A React Native admin dashboard built with Expo and TypeScript for managing store
 ## Tech Stack
 
 * React Native
-* Expo
+* Expo SDK 56
 * TypeScript
-* React Navigation
-* Expo Router (optional)
+* React Navigation v6 (Stack + Bottom Tabs)
+* Zustand for state management
+* TanStack Query for server state
+* React Native Paper for UI components
 
 ## Getting Started
 
 ### Prerequisites
 
-* Node.js
+* Node.js 18+
 * npm or yarn
-* Expo CLI
+* Expo CLI (`npm install -g @expo/cli`)
 
 ### Installation
 
@@ -48,128 +50,134 @@ Then:
 
 ## Project Structure
 
-```text
+```
 storely-admin-app/
 │
 ├── src/
-│   ├── assets/
-│   │   ├── images/
-│   │   ├── icons/
-│   │   └── fonts/
+│   ├── api/                    # API client and endpoints
+│   │   ├── apiClient.ts
+│   │   └── endpoints.ts
 │   │
 │   ├── components/
-│   │   ├── common/
-│   │   │   ├── Button.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Header.tsx
-│   │   │   └── Loader.tsx
-│   │   │
-│   │   ├── dashboard/
-│   │   │   ├── StatCard.tsx
-│   │   │   ├── RevenueChart.tsx
-│   │   │   ├── OrderCard.tsx
-│   │   │   └── RecentOrders.tsx
+│   │   ├── ecommerce/          # E-commerce specific components
+│   │   │   ├── StatCards.tsx
+│   │   │   ├── LowStockAlerts.tsx
+│   │   │   └── RecentOrdersCard.tsx
+│   │   ├── header/             # App header component
+│   │   │   └── AppHeader.tsx
+│   │   └── ui/                 # Base UI components
+│   │       ├── Avatar.tsx
+│   │       ├── Badge.tsx
+│   │       ├── Button.tsx
+│   │       ├── Card.tsx
+│   │       ├── InputField.tsx
+│   │       └── ImageUploadButton.tsx
 │   │
-│   ├── screens/
-│   │   ├── auth/
-│   │   │   └── LoginScreen.tsx
-│   │   │
-│   │   ├── dashboard/
-│   │   │   └── DashboardScreen.tsx
-│   │   │
-│   │   ├── products/
-│   │   │   ├── ProductsScreen.tsx
-│   │   │   ├── ProductDetailsScreen.tsx
-│   │   │   └── CreateProductScreen.tsx
-│   │   │
-│   │   ├── orders/
-│   │   │   └── OrdersScreen.tsx
-│   │   │
-│   │   ├── customers/
-│   │   │   └── CustomersScreen.tsx
-│   │   │
-│   │   └── settings/
-│   │       └── SettingsScreen.tsx
-│   │
-│   ├── navigation/
-│   │   ├── AppNavigator.tsx
-│   │   ├── BottomTabs.tsx
-│   │   └── RootStack.tsx
-│   │
-│   ├── services/
-│   │   ├── api.ts
-│   │   ├── auth.service.ts
-│   │   ├── product.service.ts
-│   │   └── order.service.ts
-│   │
-│   ├── store/
-│   │   ├── authStore.ts
-│   │   ├── productStore.ts
-│   │   └── uiStore.ts
+│   ├── constants/
+│   │   └── index.ts
 │   │
 │   ├── hooks/
-│   │   ├── useAuth.ts
-│   │   ├── useProducts.ts
-│   │   └── useOrders.ts
+│   │   └── useAuth.ts
+│   │
+│   ├── navigation/
+│   │   ├── RootNavigator.tsx
+│   │   ├── BottomTabNavigator.tsx
+│   │   └── stacks/
+│   │       ├── DashboardStack.tsx
+│   │       ├── OrdersStack.tsx
+│   │       ├── ProductsStack.tsx
+│   │       ├── CustomersStack.tsx
+│   │       └── MoreStack.tsx
+│   │
+│   ├── screens/
+│   │   ├── Auth/
+│   │   │   ├── SignInScreen.tsx
+│   │   │   └── RegisterScreen.tsx
+│   │   ├── Dashboard/
+│   │   │   └── HomeScreen.tsx
+│   │   ├── Orders/
+│   │   │   └── AllOrdersScreen.tsx
+│   │   ├── Products/
+│   │   │   ├── AllProductsScreen.tsx
+│   │   │   ├── AddProductsScreen.tsx
+│   │   │   ├── EditProductsScreen.tsx
+│   │   │   └── LowStockScreen.tsx
+│   │   ├── Customers/
+│   │   │   └── AllCustomersScreen.tsx
+│   │   ├── Analytics/
+│   │   │   └── AnalyticsScreen.tsx
+│   │   ├── Settings/
+│   │   │   └── SettingsScreen.tsx
+│   │   ├── Store/
+│   │   │   ├── StoreProfileScreen.tsx
+│   │   │   └── StoresScreen.tsx
+│   │   ├── Categories/
+│   │   │   └── CategoriesScreen.tsx
+│   │   └── More/
+│   │       └── MoreScreen.tsx
+│   │
+│   ├── services/
+│   │   ├── authService.ts
+│   │   ├── productService.ts
+│   │   ├── storeService.ts
+│   │   ├── userService.ts
+│   │   ├── orderService.ts
+│   │   ├── imageService.ts
+│   │   └── categoryService.ts
+│   │
+│   ├── store/
+│   │   ├── useAppStore.ts
+│   │   ├── useAuthStore.ts
+│   │   ├── useCategoryStore.ts
+│   │   └── useProductStore.ts
 │   │
 │   ├── theme/
 │   │   ├── colors.ts
-│   │   ├── spacing.ts
 │   │   ├── typography.ts
-│   │   └── index.ts
-│   │
-│   ├── constants/
-│   │   ├── routes.ts
-│   │   └── config.ts
+│   │   ├── ThemeContext.tsx
+│   │   └── globalStyles.ts
 │   │
 │   ├── types/
-│   │   ├── product.ts
-│   │   ├── order.ts
-│   │   └── user.ts
+│   │   ├── index.ts
+│   │   └── types.ts
 │   │
 │   └── utils/
-│       ├── formatCurrency.ts
-│       ├── formatDate.ts
-│       └── validators.ts
+│       ├── cloudinaryUpload.ts
+│       ├── getDeviceToken.ts
+│       ├── mockData.ts
+│       ├── slug.ts
+│       └── tokenStorage.ts
 │
-├── App.tsx
-└── package.json
-```   
-
-# Storely Admin App - Expo Mobile App
-
-## Project Overview
-React Native (Expo) mobile admin app for the Storely e-commerce platform. Mirrors the web dashboard's UI theme.
-
-## Stack
-- **Framework**: Expo SDK 52 + React Native 0.76
-- **Navigation**: React Navigation v6 (Stack + Bottom Tabs)
-- **State**: Zustand
-- **Styling**: StyleSheet (no styled-components — RN native)
-- **Icons**: @expo/vector-icons (Ionicons)
-- **Theme**: Custom ThemeContext with light/dark mode
-
-## Directory Structure
+├── assets/                     # Static assets (icons, images, fonts)
+├── android/                    # Android native project
+├── .expo/                      # Expo config cache
+├── App.tsx                     # App entry point
+├── app.config.ts               # Expo app configuration
+├── babel.config.js             # Babel configuration with module resolver
+├── eas.json                    # EAS build configuration
+├── index.ts                    # Expo entry point
+├── metro.config.js             # Metro bundler configuration
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
-src/
-├── theme/          # Colors, typography, spacing, ThemeContext
-├── components/     # Reusable UI components
-│   ├── ui/         # Base: Button, Card, Badge, Avatar, InputField
-│   ├── ecommerce/  # StatCards, RecentOrdersCard, LowStockAlerts
-│   └── header/     # AppHeader
-├── screens/        # All screen components
-│   ├── Auth/       # SignInScreen
-│   ├── Dashboard/  # HomeScreen
-│   ├── Orders/     # AllOrdersScreen
-│   ├── Products/   # AllProductsScreen
-│   ├── Customers/  # AllCustomersScreen
-│   ├── Analytics/  # AnalyticsScreen
-│   ├── Settings/   # SettingsScreen
-│   └── More/       # MoreScreen (navigation hub)
-├── navigation/     # RootNavigator, BottomTabNavigator, stacks/
-├── store/          # Zustand stores (useAuthStore, useAppStore)
-├── types/          # TypeScript interfaces
-├── constants/      # Routes, status colors
-└── utils/          # mockData, helpers
+
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+EXPO_PUBLIC_BE_API_URL=https://your-api-url.com
+EXPO_PUBLIC_EAS_PROJECT_ID=your-eas-project-id
 ```
+
+## Scripts
+
+* `npm start` - Start Expo development server
+* `npm run android` - Build and run on Android
+* `npm run ios` - Build and run on iOS
+* `npm run web` - Run on Web
+
+## License
+
+MIT

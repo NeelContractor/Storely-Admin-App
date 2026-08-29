@@ -223,6 +223,10 @@ export type CreateCategoriesBody = {
     parentId: number;  // 0 = top-level parent category, number = child of that id
     displayOrder: number
 }
+
+export type CreateCategoryBody = CreateCategoriesBody;
+
+export type UpdateCategoryBody = Partial<CreateCategoriesBody>;
   
   // ─── CLOUDIARY IMAGE ──────────────────────────────────────────────────────────────
 export type CloudiaryResponseBody = {
@@ -232,3 +236,63 @@ export type CloudiaryResponseBody = {
     cloudName: string,
     timestamp: number
 }
+
+// this is mocked data change it 
+
+
+export type OrderStatus = 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Returned';
+export type PaymentStatus = 'Paid' | 'Pending' | 'Refunded' | 'Failed';
+
+export type OrderItem = {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+  imageUrl?: string;
+};
+
+export type Order = {
+  id: string;
+  orderId: string;
+  username: string;
+  customer: string;
+  email: string;
+  phone?: string;
+  items: OrderItem[];
+  itemCount: number;
+  subtotal: number;
+  tax: number;
+  shipping: number;
+  discount: number;
+  total: number;
+  paymentStatus: PaymentStatus;
+  status: OrderStatus;
+  date: string;
+  city: string;
+  state?: string;
+  address?: string;
+  paymentMethod?: string;
+  trackingNumber?: string;
+  notes?: string;
+};
+
+export type GetAllOrders = {
+  orders: Order[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+    hasMore: boolean;
+  };
+};
+
+export type GetOrdersParams = {
+  page?: number;
+  pageSize?: number;
+  status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+};
